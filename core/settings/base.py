@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     # Tus apps
     'apps.users.apps.UsersConfig',
     'apps.tenants.apps.TenantsConfig',
+    'apps.recruitment.apps.RecruitmentConfig',
 ]
 
 # Django Rest Framework

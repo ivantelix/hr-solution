@@ -32,3 +32,17 @@ class TenantRole(models.TextChoices):
     """
     ADMIN = "admin", "Administrador"
     MEMBER = "member", "Miembro"
+
+
+class AIProvider(models.TextChoices):
+    """
+    Define los proveedores de IA soportados.
+
+    Attributes:
+        OPENAI: OpenAI (GPT-3.5, GPT-4, etc.).
+        CLAUDE: Anthropic Claude.
+        LLAMA: Meta Llama (local o API).
+    """
+    OPENAI = "openai", "OpenAI"
+    CLAUDE = "claude", "Anthropic Claude"
+    LLAMA = "llama", "Meta Llama"

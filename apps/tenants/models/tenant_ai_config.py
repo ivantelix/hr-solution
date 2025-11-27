@@ -9,20 +9,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from .tenant_model import Tenant
-
-
-class AIProvider(models.TextChoices):
-    """
-    Define los proveedores de IA soportados.
-
-    Attributes:
-        OPENAI: OpenAI (GPT-3.5, GPT-4, etc.).
-        CLAUDE: Anthropic Claude.
-        LLAMA: Meta Llama (local o API).
-    """
-    OPENAI = "openai", "OpenAI"
-    CLAUDE = "claude", "Anthropic Claude"
-    LLAMA = "llama", "Meta Llama"
+from .choices import AIProvider
 
 
 class TenantAIConfig(models.Model):

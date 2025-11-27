@@ -8,7 +8,7 @@ a un cliente/empresa en el sistema SaaS multitenant.
 import uuid
 from django.db import models
 from django.conf import settings
-from django.utils import timezone
+
 
 from .choices import PlanType
 
@@ -91,6 +91,7 @@ class Tenant(models.Model):
     members = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         through="TenantMembership",
+        through_fields=("tenant", "user"),
         related_name="tenants",
         verbose_name="Miembros"
     )
