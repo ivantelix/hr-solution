@@ -26,5 +26,31 @@ services:
     ports:
       - "5432:5432"
 
+  # --- LANGFUSE SERVICES ---
+  langfuse-server:
+    image: langfuse/langfuse:latest
+    depends_on:
+      - langfuse-db
+    ports:
+      - "3000:3000" # Accederás al panel en localhost:3000
+    environment:
+      - DATABASE_URL=postgresql://langfuse:langfuse@langfuse-db:5432/langfuse
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=mi_secreto_super_seguro
+      - SALT=otro_secreto
+      # Deshabilita telemetría para privacidad total
+      - TELEMETRY_ENABLED=false 
+
+  langfuse-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=langfuse
+      - POSTGRES_PASSWORD=langfuse
+      - POSTGRES_DB=langfuse
+    volumes:
+      - langfuse_data:/var/lib/postgresql/data
+
 volumes:
   postgres_data:
+  langfuse_data:
+

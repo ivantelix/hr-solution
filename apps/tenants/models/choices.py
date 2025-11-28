@@ -43,6 +43,7 @@ class AIProvider(models.TextChoices):
         CLAUDE: Anthropic Claude.
         LLAMA: Meta Llama (local o API).
     """
+    PLATFORM_DEFAULT = "platform_default", "Default de la Plataforma"
     OPENAI = "openai", "OpenAI"
     CLAUDE = "claude", "Anthropic Claude"
     LLAMA = "llama", "Meta Llama"

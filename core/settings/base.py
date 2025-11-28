@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'apps.users.apps.UsersConfig',
     'apps.tenants.apps.TenantsConfig',
     'apps.recruitment.apps.RecruitmentConfig',
+    'apps.ai_core.apps.AIConfig',
 ]
 
 # Django Rest Framework
@@ -170,3 +171,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutos
+
+# AI Provider Configuration (LangChain)
+OPENAI_API_KEY_GLOBAL = os.environ.get('OPENAI_API_KEY', '')
+CLAUDE_API_KEY_GLOBAL = os.environ.get('CLAUDE_API_KEY', '')
