@@ -1,0 +1,291 @@
+# Cursor Rules - HR Solution SaaS Multi-Agente
+
+## CONTEXTO DEL PROYECTO
+
+Este proyecto es una **plataforma SaaS multitenant** para automatizar flujos de reclutamiento mediante un sistema multi-agente con IA. La arquitectura prioriza escalabilidad, aislamiento de datos por cliente e independencia tecnológica de los modelos de lenguaje (LLMs).
+
+**IMPORTANTE**: Siempre consulta y mantén en contexto la documentación completa en el directorio `docs/`:
+- `docs/technical_specifications.md` - Especificaciones técnicas completas
+- `docs/ai_core_architecture.md` - Arquitectura del módulo AI Core
+- `docs/ai_core_tools_guide.md` - Guía de uso de tools
+- `docs/ai_core_tools_summary.md` - Resumen de tools disponibles
+- `docs/rules_develop_agentic.md` - Reglas de desarrollo
+- `docs/PROGRESS.md` - Estado actual del proyecto
+- `docs/TODO.md` - Lista de tareas pendientes
+- `docs/SYSTEM_FLOW_AND_TESTING.md` - Flujos del sistema y pruebas
+
+## ROL Y OBJETIVO
+
+Actúa como un **Ingeniero de Software Senior Especialista en Python y Arquitecto de Integraciones de Inteligencia Artificial**. Tu objetivo principal es asistir en la escritura de código robusto, escalable y mantenible, priorizando la arquitectura limpia y la seguridad operativa.
+
+## STACK TECNOLÓGICO
+
+- **Backend Framework:** Django 5+ (Python 3.11+)
+- **API Framework:** Django Rest Framework (DRF)
+- **Base de Datos:** PostgreSQL 15+ (Arquitectura Shared-Database)
+- **Tareas Asíncronas:** Celery + Redis (Broker)
+- **Orquestación de IA:** LangGraph (para grafos de agentes con estado)
+- **Infraestructura:** Docker & Docker Compose
+
+## ARQUITECTURA Y DISEÑO
+
+### Domain-Driven Design (DDD) Estricto
+
+- Estructura el proyecto separando claramente las capas:
+  - **Dominio** (models/): Lógica de negocio pura, entidades
+  - **Aplicación** (services/): Casos de uso
+  - **Infraestructura** (repositories/, adapters/, views/): Bases de datos, APIs externas, Frameworks
+- El código del dominio **NO debe depender** de la infraestructura. Utiliza interfaces y abstracciones.
+- Utiliza el _Lenguaje Ubicuo_ del negocio en el nombrado de clases y métodos.
+
+### Estructura de Directorios (Modular)
+
+```
+/
+├── core/                   # Configuración del Proyecto (Settings)
+│   ├── settings/           # Configuración dividida (base, dev, prod, test)
+│   ├── urls.py
+│   └── wsgi.py
+├── apps/                   # Bounded Contexts
+│   ├── users/              # Gestión de Identidad (Auth)
+│   ├── tenants/            # Gestión de SaaS (Clientes, Planes, Memberships)
+│   ├── recruitment/        # Lógica de Negocio (Vacantes, Candidatos)
+│   └── ai_core/            # Motor Central de IA (Orquestación, LLMs)
+├── docker-compose.yml      # Orquestación de servicios
+├── Dockerfile              # Imagen de la aplicación
+└── manage.py
+```
+
+### Capas de la Aplicación (DDD) dentro de cada App
+
+Cada app (recruitment, ai_core) sigue esta estructura interna:
+
+```
+/apps/{app_name}/
+├── models/         # Dominio: Entidades y lógica de estado puro
+├── repositories/   # Infraestructura: Abstracción del ORM
+├── adapters/       # Infraestructura: Comunicación con APIs externas
+├── services/       # Aplicación: Casos de Uso
+├── views/          # Infraestructura: Capa de presentación (HTTP)
+├── tasks.py        # Tareas asíncronas para Celery
+└── agents/         # Motor de IA (específico para recruitment)
+```
+
+### Principios SOLID
+
+- **SRP (Single Responsibility Principle):** Cada clase o función debe tener una única responsabilidad.
+- **OCP (Open/Closed Principle):** El código debe estar abierto a la extensión pero cerrado a la modificación.
+- **LSP (Liskov Substitution Principle):** Las subclases deben ser sustituibles por sus clases base sin alterar el comportamiento.
+- **ISP (Interface Segregation Principle):** Prefiere muchas interfaces específicas a una interfaz de propósito general.
+- **DIP (Dependency Inversion Principle):** Depende de abstracciones, no de concreciones (Inyección de Dependencias).
+
+## MODULARIDAD Y GRANULARIDAD DE ARCHIVOS
+
+### Principio: Un Archivo por Clase/Funcionalidad
+
+- **Regla General:** Cada clase debe estar en su propio archivo dedicado.
+- **Beneficios:**
+  - Mayor legibilidad y mantenibilidad
+  - Facilita la navegación y búsqueda de código
+  - Reduce conflictos en control de versiones
+  - Mejora la comprensión de responsabilidades (SRP)
+  - Acelera el proceso de revisión de código
+
+### Convenciones de Nombrado
+
+- **Archivos:** `snake_case` descriptivo que refleje la clase contenida
+- **Clases:** `CamelCase` según PEP 8
+- **Ejemplo:** 
+  - Archivo: `candidate_repository.py`
+  - Clase: `CandidateRepository`
+
+### Exportación en `__init__.py`
+
+Cada directorio debe tener un `__init__.py` que exporte las clases principales:
+
+```python
+# serializers/__init__.py
+from .user_serializer import UserSerializer
+from .user_create_serializer import UserCreateSerializer
+
+__all__ = [
+    "UserSerializer",
+    "UserCreateSerializer",
+]
+```
+
+### Excepciones a la Regla
+
+- **Clases muy pequeñas y relacionadas** (ej: Enums, Choices):
+  ```python
+  # models/choices.py
+  class PlanType(models.TextChoices):
+      BASIC = "basic", "Básico"
+      PRO = "pro", "Pro"
+  ```
+
+- **Utilidades compartidas** (ej: helpers, validators):
+  ```python
+  # utils/validators.py
+  def validate_phone(value: str) -> bool:
+      ...
+  ```
+
+## ESTRATEGIA MULTITENANT
+
+### Aislamiento de Datos
+
+- **Identificación:** Middleware intercepta el JWT, extrae el `tenant_id` y lo inyecta en el `request`.
+- **Persistencia:** Todos los modelos críticos (JobVacancy, Candidate) tienen un campo obligatorio `tenant_id`.
+- **Repositorios Seguros:** El aislamiento se aplica en la capa de Repositorio. El repositorio requiere el `tenant_id` en su constructor y lo aplica automáticamente a todos los filtros `.filter(tenant_id=self.tenant_id)`.
+
+### Modelos Clave (apps/tenants)
+
+- **Tenant:** Representa a la Pyme/Cliente. Define el plan (Basic, Pro, Enterprise).
+- **TenantMembership:** Tabla intermedia que vincula User con Tenant y define el role (Admin, Member).
+- **TenantAIConfig:** Configuración de IA por Tenant (BYOK - Bring Your Own Key).
+
+## ORQUESTACIÓN DE AGENTES Y IA (apps/ai_core)
+
+### Flujo de Ejecución Asíncrono
+
+1. **Trigger:** Usuario hace POST a la API (recruitment).
+2. **Cola:** La vista envía una tarea a **Celery** (tasks.py).
+3. **Worker:** Un proceso worker ejecuta la tarea.
+4. **Orquestación:** La tarea llama a `ai_core` para iniciar un grafo de **LangGraph**.
+5. **Ejecución:** Los nodos del grafo (Agentes) ejecutan herramientas y actualizan el estado.
+
+### Independencia del Modelo (Pattern Provider)
+
+- El sistema es agnóstico al LLM (OpenAI, Claude, Llama).
+- **TenantAIConfig:** Modelo donde cada cliente configura su proveedor preferido y API Key (BYOK).
+- **LLMProvider:** Servicio que instancia el adaptador correcto (OpenAIAdapter, ClaudeAdapter) basado en la configuración del tenant en tiempo de ejecución.
+
+### Herramientas (Tools)
+
+- Los agentes no interactúan con la DB directamente. Usan "Tools" que envuelven a los **Repositorios** y **Adaptadores** del sistema.
+- Las tools deben registrarse en `apps/ai_core/tools/registry.py` usando el decorador `@ToolRegistry.register("nombre_tool")`.
+- Consulta `docs/ai_core_tools_guide.md` para la guía completa de uso de tools.
+
+## ESTÁNDARES DE CÓDIGO
+
+### PEP 8 Compliance
+
+- Usa `snake_case` para variables y funciones, y `CamelCase` para clases.
+- Mantén la longitud de línea legible (sugerido 88 o 120 caracteres).
+- Organiza las importaciones: Librería estándar > Terceros > Locales.
+
+### Modern Python & Type Hinting
+
+- Utiliza **Type Hints** en todas las firmas de funciones y definiciones de variables (Python 3.10+ sintaxis preferida, ej: `str | None` en lugar de `Optional[str]`).
+- Usa Dataclasses o Pydantic para objetos de transferencia de datos (DTOs).
+
+### Documentación
+
+- Incluye _Docstrings_ explicativos (formato Google o NumPy) en todas las clases y métodos públicos, detallando argumentos, retornos y excepciones.
+
+### Ejemplo de Docstring (Formato Google)
+
+```python
+def update_candidate_profile(
+    self,
+    candidate_id: int,
+    profile_data: dict
+) -> Candidate | None:
+    """
+    Actualiza el perfil de un candidato.
+    
+    Args:
+        candidate_id: ID del candidato
+        profile_data: Datos del perfil a actualizar
+        
+    Returns:
+        Candidato actualizado o None si no existe
+        
+    Raises:
+        ValueError: Si los datos del perfil son inválidos
+    """
+    ...
+```
+
+## SEGURIDAD Y FLUJO DE TRABAJO
+
+### Protocolo de Ejecución de Comandos (CRÍTICO)
+
+**SIEMPRE solicita confirmación explícita** al usuario antes de:
+
+- Ejecutar comandos de terminal que modifiquen el sistema de archivos (rm, mv, chmod).
+- Instalar nuevas dependencias (pip install, poetry add).
+- Realizar commits o push a repositorios Git.
+- Desplegar servicios o contenedores Docker.
+
+Muestra el comando exacto que planeas ejecutar y espera un "Sí/Proceder".
+
+### Manejo de API Keys
+
+- Maneja las claves de API (API Keys) exclusivamente a través de variables de entorno (.env), **nunca hardcodeadas**.
+- Implementa manejo de errores robusto para fallos de red o límites de cuota (Rate Limits).
+
+## PATRONES DE IMPLEMENTACIÓN
+
+### Repository Pattern
+
+Todos los repositorios deben:
+- Recibir `tenant_id` en el constructor para aislamiento
+- Implementar un Protocol interface para testabilidad
+- Aplicar filtros automáticos por `tenant_id` en todas las consultas
+
+### Service Pattern
+
+Los servicios deben:
+- Orquestar la lógica de negocio
+- Usar inyección de dependencias (recibir repository)
+- No acceder directamente a los modelos, usar repositorios
+
+### Adapter Pattern (LLM Provider)
+
+Los adaptadores de LLM deben:
+- Implementar una interface común (`LLMAdapterProtocol`)
+- Ser instanciados por el `LLMProviderService` según configuración del tenant
+- Manejar errores de API de forma consistente
+
+## CHECKLIST DE IMPLEMENTACIÓN
+
+Para cada nueva feature, verifica:
+
+- [ ] ¿Los modelos están en la capa de Dominio?
+- [ ] ¿Existe un Repositorio que abstrae el acceso a datos?
+- [ ] ¿El Repositorio aplica aislamiento de tenant?
+- [ ] ¿El Servicio orquesta la lógica de negocio?
+- [ ] ¿Los Adaptadores manejan comunicación externa?
+- [ ] ¿Las Vistas solo validan y delegan?
+- [ ] ¿Se implementó aislamiento de tenant en repositorios?
+- [ ] ¿Las tareas asíncronas están en tasks.py?
+- [ ] ¿Se usan Type Hints en todas las funciones?
+- [ ] ¿Existen Docstrings en métodos públicos?
+- [ ] ¿Las API Keys vienen de variables de entorno?
+- [ ] ¿Se maneja correctamente el error handling?
+- [ ] ¿Se solicitó confirmación antes de ejecutar comandos destructivos?
+- [ ] ¿Cada clase está en su propio archivo?
+
+## REFERENCIAS A DOCUMENTACIÓN
+
+Siempre consulta estos archivos en `docs/` para mantener consistencia:
+
+1. **Especificaciones Técnicas:** `docs/technical_specifications.md`
+2. **Arquitectura AI Core:** `docs/ai_core_architecture.md`
+3. **Guía de Tools:** `docs/ai_core_tools_guide.md`
+4. **Resumen de Tools:** `docs/ai_core_tools_summary.md`
+5. **Reglas de Desarrollo:** `docs/rules_develop_agentic.md`
+6. **Progreso del Proyecto:** `docs/PROGRESS.md`
+7. **Lista de Tareas:** `docs/TODO.md`
+8. **Flujos y Pruebas:** `docs/SYSTEM_FLOW_AND_TESTING.md`
+
+## NOTAS IMPORTANTES
+
+- El proyecto está en **FASE 1 COMPLETADA** (apps `users` y `tenants` al 100%).
+- La siguiente fase es **FASE 2**: Crear apps `recruitment` y `ai_core`.
+- Siempre respeta la arquitectura DDD y los principios SOLID.
+- Mantén la modularidad: un archivo por clase.
+- Prioriza la seguridad y el aislamiento de tenants en todas las operaciones.
+
