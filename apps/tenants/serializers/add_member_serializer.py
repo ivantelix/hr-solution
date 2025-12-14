@@ -6,6 +6,7 @@ a un tenant.
 """
 
 from rest_framework import serializers
+
 from apps.tenants.models import TenantRole
 
 
@@ -18,14 +19,13 @@ class AddMemberSerializer(serializers.Serializer):
     """
 
     user_id = serializers.IntegerField(
-        required=True,
-        help_text="ID del usuario a agregar"
+        required=True, help_text="ID del usuario a agregar"
     )
 
     role = serializers.ChoiceField(
         choices=TenantRole.choices,
         default=TenantRole.MEMBER,
-        help_text="Rol del usuario en el tenant"
+        help_text="Rol del usuario en el tenant",
     )
 
     def validate_user_id(self, value: int) -> int:

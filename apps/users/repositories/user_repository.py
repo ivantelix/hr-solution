@@ -7,6 +7,7 @@ operaciones de persistencia.
 """
 
 from typing import Protocol
+
 from django.db.models import QuerySet
 
 from apps.users.models import User
@@ -122,8 +123,7 @@ class UserRepository:
         """
         return list(
             User.objects.filter(
-                tenantmembership__tenant_id=tenant_id,
-                tenantmembership__is_active=True
+                tenantmembership__tenant_id=tenant_id, tenantmembership__is_active=True
             ).distinct()
         )
 
@@ -145,11 +145,7 @@ class UserRepository:
         return User.objects.create(**kwargs)
 
     def create_user(
-        self,
-        username: str,
-        email: str,
-        password: str,
-        **extra_fields
+        self, username: str, email: str, password: str, **extra_fields
     ) -> User:
         """
         Crea un nuevo usuario con contraseña hasheada.
@@ -164,10 +160,7 @@ class UserRepository:
             User: Usuario creado con contraseña hasheada.
         """
         return User.objects.create_user(
-            username=username,
-            email=email,
-            password=password,
-            **extra_fields
+            username=username, email=email, password=password, **extra_fields
         )
 
     def update(self, user: User, **kwargs) -> User:

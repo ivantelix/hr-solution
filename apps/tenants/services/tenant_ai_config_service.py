@@ -5,10 +5,9 @@ Este módulo contiene los casos de uso relacionados con la
 configuración de IA de los tenants (BYOK).
 """
 
-from typing import Any
 from django.db import transaction
 
-from apps.tenants.models import TenantAIConfig, AIProvider
+from apps.tenants.models import AIProvider, TenantAIConfig
 from apps.tenants.repositories import TenantRepository
 
 
@@ -23,19 +22,14 @@ class TenantAIConfigService:
         tenant_repository: Repositorio de tenants.
     """
 
-    def __init__(
-        self,
-        tenant_repository: TenantRepository | None = None
-    ):
+    def __init__(self, tenant_repository: TenantRepository | None = None):
         """
         Inicializa el servicio con el repositorio.
 
         Args:
             tenant_repository: Repositorio de tenants.
         """
-        self.tenant_repository = (
-            tenant_repository or TenantRepository()
-        )
+        self.tenant_repository = tenant_repository or TenantRepository()
 
     @transaction.atomic
     def configure_ai(
@@ -45,7 +39,7 @@ class TenantAIConfigService:
         api_key: str,
         model_name: str = "gpt-4",
         temperature: float = 0.7,
-        max_tokens: int = 2000
+        max_tokens: int = 2000,
     ) -> TenantAIConfig:
         """
         Configura o actualiza la configuración de IA de un tenant.
@@ -72,14 +66,10 @@ class TenantAIConfigService:
 
         # Validar parámetros
         if temperature < 0.0 or temperature > 2.0:
-            raise ValueError(
-                "La temperatura debe estar entre 0.0 y 2.0"
-            )
+            raise ValueError("La temperatura debe estar entre 0.0 y 2.0")
 
         if max_tokens < 1:
-            raise ValueError(
-                "El máximo de tokens debe ser al menos 1"
-            )
+            raise ValueError("El máximo de tokens debe ser al menos 1")
 
         # Verificar si ya existe configuración
         try:
@@ -100,17 +90,13 @@ class TenantAIConfigService:
                 api_key=api_key,
                 model_name=model_name,
                 temperature=temperature,
-                max_tokens=max_tokens
+                max_tokens=max_tokens,
             )
 
         return config
 
     @transaction.atomic
-    def update_api_key(
-        self,
-        tenant_id: str,
-        new_api_key: str
-    ) -> TenantAIConfig | None:
+    def update_api_key(self, tenant_id: str, new_api_key: str) -> TenantAIConfig | None:
         """
         Actualiza la API Key de un tenant.
 
@@ -139,7 +125,7 @@ class TenantAIConfigService:
         tenant_id: str,
         model_name: str | None = None,
         temperature: float | None = None,
-        max_tokens: int | None = None
+        max_tokens: int | None = None,
     ) -> TenantAIConfig | None:
         """
         Actualiza la configuración del modelo de IA.
@@ -169,16 +155,12 @@ class TenantAIConfigService:
 
             if temperature is not None:
                 if temperature < 0.0 or temperature > 2.0:
-                    raise ValueError(
-                        "La temperatura debe estar entre 0.0 y 2.0"
-                    )
+                    raise ValueError("La temperatura debe estar entre 0.0 y 2.0")
                 config.temperature = temperature
 
             if max_tokens is not None:
                 if max_tokens < 1:
-                    raise ValueError(
-                        "El máximo de tokens debe ser al menos 1"
-                    )
+                    raise ValueError("El máximo de tokens debe ser al menos 1")
                 config.max_tokens = max_tokens
 
             config.save()
@@ -193,7 +175,7 @@ class TenantAIConfigService:
         tenant_id: str,
         new_provider: AIProvider,
         new_api_key: str,
-        new_model_name: str
+        new_model_name: str,
     ) -> TenantAIConfig | None:
         """
         Cambia el proveedor de IA de un tenant.
@@ -223,10 +205,7 @@ class TenantAIConfigService:
         except TenantAIConfig.DoesNotExist:
             return None
 
-    def get_ai_config(
-        self,
-        tenant_id: str
-    ) -> TenantAIConfig | None:
+    def get_ai_config(self, tenant_id: str) -> TenantAIConfig | None:
         """
         Obtiene la configuración de IA de un tenant.
 
@@ -241,10 +220,7 @@ class TenantAIConfigService:
         )
 
     @transaction.atomic
-    def deactivate_ai_config(
-        self,
-        tenant_id: str
-    ) -> TenantAIConfig | None:
+    def deactivate_ai_config(self, tenant_id: str) -> TenantAIConfig | None:
         """
         Desactiva la configuración de IA de un tenant.
 
@@ -267,10 +243,7 @@ class TenantAIConfigService:
             return None
 
     @transaction.atomic
-    def activate_ai_config(
-        self,
-        tenant_id: str
-    ) -> TenantAIConfig | None:
+    def activate_ai_config(self, tenant_id: str) -> TenantAIConfig | None:
         """
         Activa la configuración de IA de un tenant.
 

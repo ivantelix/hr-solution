@@ -6,7 +6,8 @@ extrae el tenant_id del JWT y lo inyecta en el request para
 garantizar el aislamiento de datos por tenant.
 """
 
-from typing import Callable
+from collections.abc import Callable
+
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken
@@ -75,22 +76,21 @@ class TenantMiddleware:
             'tenant_id' o 'tenant'.
         """
         # Intentar obtener el token del header Authorization
-        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+        auth_header = request.META.get("HTTP_AUTHORIZATION", "")
 
-        if not auth_header.startswith('Bearer '):
+        if not auth_header.startswith("Bearer "):
             return None
 
         try:
             # Validar y decodificar el token
             validated_token = self.jwt_authenticator.get_validated_token(
-                auth_header.split(' ')[1]
+                auth_header.split(" ")[1]
             )
 
             # Extraer tenant_id del payload
             # Puede estar como 'tenant_id' o 'tenant'
-            tenant_id = (
-                validated_token.get('tenant_id') or
-                validated_token.get('tenant')
+            tenant_id = validated_token.get("tenant_id") or validated_token.get(
+                "tenant"
             )
 
             return str(tenant_id) if tenant_id else None
@@ -113,10 +113,10 @@ class TenantRequiredMiddleware:
 
     # Paths que no requieren tenant_id
     EXCLUDED_PATHS = [
-        '/api/users/',  # Registro de usuarios
-        '/api/auth/',   # Autenticación
-        '/admin/',      # Django admin
-        '/api/docs/',   # Documentación API
+        "/api/users/",  # Registro de usuarios
+        "/api/auth/",  # Autenticación
+        "/admin/",  # Django admin
+        "/api/docs/",  # Documentación API
     ]
 
     def __init__(self, get_response: Callable):
@@ -143,17 +143,17 @@ class TenantRequiredMiddleware:
             return self.get_response(request)
 
         # Verificar si el usuario está autenticado
-        if not hasattr(request, 'user') or not request.user.is_authenticated:
+        if not hasattr(request, "user") or not request.user.is_authenticated:
             return self.get_response(request)
 
         # Verificar que tenga tenant_id
-        if not hasattr(request, 'tenant_id') or not request.tenant_id:
+        if not hasattr(request, "tenant_id") or not request.tenant_id:
             return JsonResponse(
                 {
-                    'error': 'Tenant ID requerido',
-                    'detail': 'Esta operación requiere un tenant válido.'
+                    "error": "Tenant ID requerido",
+                    "detail": "Esta operación requiere un tenant válido.",
                 },
-                status=403
+                status=403,
             )
 
         return self.get_response(request)
@@ -168,7 +168,4 @@ class TenantRequiredMiddleware:
         Returns:
             bool: True si el path está excluido.
         """
-        return any(
-            path.startswith(excluded)
-            for excluded in self.EXCLUDED_PATHS
-        )
+        return any(path.startswith(excluded) for excluded in self.EXCLUDED_PATHS)

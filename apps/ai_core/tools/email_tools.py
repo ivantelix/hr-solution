@@ -5,19 +5,16 @@ Este módulo contiene tools para envío de emails a candidatos,
 generación de templates, etc.
 """
 
-from typing import Dict, Optional
 from langchain_core.tools import tool
+
 from .registry import ToolRegistry
 
 
 @ToolRegistry.register("send_candidate_email")
 @tool
 def send_candidate_email(
-    to_email: str,
-    subject: str,
-    body: str,
-    tenant_id: str
-) -> Dict:
+    to_email: str, subject: str, body: str, tenant_id: str
+) -> dict:
     """
     Envía un email a un candidato.
 
@@ -59,8 +56,8 @@ def generate_interview_invitation_email(
     position: str,
     interview_date: str,
     interview_time: str,
-    company_name: str
-) -> Dict:
+    company_name: str,
+) -> dict:
     """
     Genera un email de invitación a entrevista.
 
@@ -118,8 +115,8 @@ def generate_rejection_email(
     candidate_name: str,
     position: str,
     company_name: str,
-    personalized_feedback: Optional[str] = None
-) -> Dict:
+    personalized_feedback: str | None = None,
+) -> dict:
     """
     Genera un email de rechazo cordial.
 

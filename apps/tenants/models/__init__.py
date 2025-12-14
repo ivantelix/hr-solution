@@ -1,17 +1,15 @@
 """Modelos de la app tenants."""
 
-from .choices import PlanType, TenantRole, AIProvider
-from .tenant_model import Tenant
-from .tenant_membership import TenantMembership
+from .choices import AIProvider, PlanType, TenantRole
 from .tenant_ai_config import TenantAIConfig
+from .tenant_membership import TenantMembership
+from .tenant_model import Tenant
 
 __all__ = [
-    # Choices
-    "PlanType",
-    "TenantRole",
     "AIProvider",
-    # Models
+    "PlanType",
     "Tenant",
-    "TenantMembership",
     "TenantAIConfig",
+    "TenantMembership",
+    "TenantRole",
 ]

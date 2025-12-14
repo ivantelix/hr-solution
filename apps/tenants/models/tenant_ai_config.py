@@ -5,11 +5,11 @@ Este módulo contiene el modelo de configuración de IA para cada tenant,
 permitiendo BYOK (Bring Your Own Key) y selección de proveedor LLM.
 """
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
 
-from .tenant_model import Tenant
 from .choices import AIProvider
+from .tenant_model import Tenant
 
 
 class TenantAIConfig(models.Model):
@@ -40,7 +40,7 @@ class TenantAIConfig(models.Model):
         Tenant,
         on_delete=models.CASCADE,
         related_name="ai_config",
-        verbose_name="Tenant"
+        verbose_name="Tenant",
     )
 
     provider = models.CharField(
@@ -48,53 +48,48 @@ class TenantAIConfig(models.Model):
         choices=AIProvider.choices,
         default=AIProvider.OPENAI,
         verbose_name="Proveedor de IA",
-        help_text="Proveedor de IA a utilizar"
+        help_text="Proveedor de IA a utilizar",
     )
 
     api_key = models.CharField(
         max_length=500,
         verbose_name="API Key",
-        help_text="API Key del proveedor (será encriptada)"
+        help_text="API Key del proveedor (será encriptada)",
     )
 
     model_name = models.CharField(
         max_length=100,
         default="gpt-4",
         verbose_name="Nombre del Modelo",
-        help_text="Modelo específico a usar (ej: gpt-4, claude-3)"
+        help_text="Modelo específico a usar (ej: gpt-4, claude-3)",
     )
 
     temperature = models.FloatField(
         default=0.7,
-        validators=[
-            MinValueValidator(0.0),
-            MaxValueValidator(2.0)
-        ],
+        validators=[MinValueValidator(0.0), MaxValueValidator(2.0)],
         verbose_name="Temperatura",
-        help_text="Controla la creatividad (0.0 - 2.0)"
+        help_text="Controla la creatividad (0.0 - 2.0)",
     )
 
     max_tokens = models.PositiveIntegerField(
         default=2000,
         validators=[MinValueValidator(1)],
         verbose_name="Máximo de Tokens",
-        help_text="Máximo de tokens por request"
+        help_text="Máximo de tokens por request",
     )
 
     is_active = models.BooleanField(
         default=True,
         verbose_name="Activo",
-        help_text="Indica si la configuración está activa"
+        help_text="Indica si la configuración está activa",
     )
 
     created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Fecha de Creación"
+        auto_now_add=True, verbose_name="Fecha de Creación"
     )
 
     updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Fecha de Actualización"
+        auto_now=True, verbose_name="Fecha de Actualización"
     )
 
     class Meta:

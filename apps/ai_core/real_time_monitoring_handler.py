@@ -1,6 +1,6 @@
-from langchain_core.callbacks import BaseCallbackHandler
-from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from langchain_core.callbacks import BaseCallbackHandler
 
 
 class RealTimeMonitoringHandler(BaseCallbackHandler):
@@ -26,6 +26,6 @@ class RealTimeMonitoringHandler(BaseCallbackHandler):
             {
                 # Método en Consumer de Django Channels
                 "type": "agent_update",
-                "data": {"status": type, "message": message}
-            }
+                "data": {"status": type, "message": message},
+            },
         )

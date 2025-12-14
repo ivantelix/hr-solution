@@ -7,10 +7,11 @@ a través de repositorios.
 """
 
 from typing import Any
+
 from django.db import transaction
 from django.utils.text import slugify
 
-from apps.tenants.models import Tenant, PlanType
+from apps.tenants.models import PlanType, Tenant
 from apps.tenants.repositories import TenantRepository
 
 
@@ -26,10 +27,7 @@ class TenantService:
         repository: Repositorio de tenants para acceso a datos.
     """
 
-    def __init__(
-        self,
-        repository: TenantRepository | None = None
-    ):
+    def __init__(self, repository: TenantRepository | None = None):
         """
         Inicializa el servicio con el repositorio.
 
@@ -46,7 +44,7 @@ class TenantService:
         slug: str | None = None,
         plan: PlanType = PlanType.BASIC,
         max_users: int = 5,
-        **extra_fields: Any
+        **extra_fields: Any,
     ) -> Tenant:
         """
         Crea un nuevo tenant.
@@ -71,27 +69,17 @@ class TenantService:
 
         # Validar que el slug sea único
         if self.repository.get_by_slug(slug):
-            raise ValueError(
-                f"El slug '{slug}' ya está en uso."
-            )
+            raise ValueError(f"El slug '{slug}' ya está en uso.")
 
         # Crear el tenant
         tenant = self.repository.create(
-            name=name,
-            slug=slug,
-            plan=plan,
-            max_users=max_users,
-            **extra_fields
+            name=name, slug=slug, plan=plan, max_users=max_users, **extra_fields
         )
 
         return tenant
 
     @transaction.atomic
-    def update_tenant(
-        self,
-        tenant_id: str,
-        **update_data: Any
-    ) -> Tenant | None:
+    def update_tenant(self, tenant_id: str, **update_data: Any) -> Tenant | None:
         """
         Actualiza un tenant existente.
 
@@ -111,23 +99,18 @@ class TenantService:
             return None
 
         # Validar slug si se está actualizando
-        if 'slug' in update_data:
-            new_slug = update_data['slug']
+        if "slug" in update_data:
+            new_slug = update_data["slug"]
             existing = self.repository.get_by_slug(new_slug)
             if existing and str(existing.id) != tenant_id:
-                raise ValueError(
-                    f"El slug '{new_slug}' ya está en uso."
-                )
+                raise ValueError(f"El slug '{new_slug}' ya está en uso.")
 
         # Actualizar el tenant
         return self.repository.update(tenant, **update_data)
 
     @transaction.atomic
     def update_plan(
-        self,
-        tenant_id: str,
-        new_plan: PlanType,
-        new_max_users: int | None = None
+        self, tenant_id: str, new_plan: PlanType, new_max_users: int | None = None
     ) -> Tenant | None:
         """
         Actualiza el plan de suscripción de un tenant.
@@ -148,7 +131,7 @@ class TenantService:
         if not tenant:
             return None
 
-        update_data = {'plan': new_plan}
+        update_data = {"plan": new_plan}
 
         if new_max_users is not None:
             # Verificar que no sea menor al número actual de
@@ -160,7 +143,7 @@ class TenantService:
                     f"usuarios. Actualmente hay {current_members} "
                     f"miembros activos."
                 )
-            update_data['max_users'] = new_max_users
+            update_data["max_users"] = new_max_users
 
         return self.repository.update(tenant, **update_data)
 

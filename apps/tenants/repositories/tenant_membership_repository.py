@@ -6,9 +6,10 @@ a datos del modelo TenantMembership.
 """
 
 from typing import Protocol
+
 from django.db.models import QuerySet
 
-from apps.tenants.models import TenantMembership, Tenant, TenantRole
+from apps.tenants.models import Tenant, TenantMembership, TenantRole
 
 
 class TenantMembershipRepositoryProtocol(Protocol):
@@ -44,10 +45,7 @@ class TenantMembershipRepository:
     modelo TenantMembership.
     """
 
-    def get_by_id(
-        self,
-        membership_id: int
-    ) -> TenantMembership | None:
+    def get_by_id(self, membership_id: int) -> TenantMembership | None:
         """
         Obtiene una membresía por su ID.
 
@@ -64,9 +62,7 @@ class TenantMembershipRepository:
             return None
 
     def get_by_user_and_tenant(
-        self,
-        user_id: int,
-        tenant_id: str
+        self, user_id: int, tenant_id: str
     ) -> TenantMembership | None:
         """
         Obtiene la membresía de un usuario en un tenant específico.
@@ -79,10 +75,7 @@ class TenantMembershipRepository:
             TenantMembership | None: Membresía si existe.
         """
         try:
-            return TenantMembership.objects.get(
-                user_id=user_id,
-                tenant_id=tenant_id
-            )
+            return TenantMembership.objects.get(user_id=user_id, tenant_id=tenant_id)
         except TenantMembership.DoesNotExist:
             return None
 
@@ -97,16 +90,12 @@ class TenantMembershipRepository:
             list[Tenant]: Lista de tenants del usuario.
         """
         memberships = TenantMembership.objects.filter(
-            user_id=user_id,
-            is_active=True
-        ).select_related('tenant')
+            user_id=user_id, is_active=True
+        ).select_related("tenant")
 
         return [m.tenant for m in memberships]
 
-    def get_tenant_members(
-        self,
-        tenant_id: str
-    ) -> QuerySet[TenantMembership]:
+    def get_tenant_members(self, tenant_id: str) -> QuerySet[TenantMembership]:
         """
         Obtiene todas las membresías de un tenant.
 
@@ -116,14 +105,11 @@ class TenantMembershipRepository:
         Returns:
             QuerySet[TenantMembership]: QuerySet con las membresías.
         """
-        return TenantMembership.objects.filter(
-            tenant_id=tenant_id
-        ).select_related('user')
+        return TenantMembership.objects.filter(tenant_id=tenant_id).select_related(
+            "user"
+        )
 
-    def get_active_members(
-        self,
-        tenant_id: str
-    ) -> QuerySet[TenantMembership]:
+    def get_active_members(self, tenant_id: str) -> QuerySet[TenantMembership]:
         """
         Obtiene las membresías activas de un tenant.
 
@@ -135,14 +121,10 @@ class TenantMembershipRepository:
                 activas.
         """
         return TenantMembership.objects.filter(
-            tenant_id=tenant_id,
-            is_active=True
-        ).select_related('user')
+            tenant_id=tenant_id, is_active=True
+        ).select_related("user")
 
-    def get_admins(
-        self,
-        tenant_id: str
-    ) -> QuerySet[TenantMembership]:
+    def get_admins(self, tenant_id: str) -> QuerySet[TenantMembership]:
         """
         Obtiene los administradores de un tenant.
 
@@ -153,10 +135,8 @@ class TenantMembershipRepository:
             QuerySet[TenantMembership]: QuerySet con admins.
         """
         return TenantMembership.objects.filter(
-            tenant_id=tenant_id,
-            role=TenantRole.ADMIN,
-            is_active=True
-        ).select_related('user')
+            tenant_id=tenant_id, role=TenantRole.ADMIN, is_active=True
+        ).select_related("user")
 
     def create(self, **kwargs) -> TenantMembership:
         """
@@ -170,11 +150,7 @@ class TenantMembershipRepository:
         """
         return TenantMembership.objects.create(**kwargs)
 
-    def update(
-        self,
-        membership: TenantMembership,
-        **kwargs
-    ) -> TenantMembership:
+    def update(self, membership: TenantMembership, **kwargs) -> TenantMembership:
         """
         Actualiza una membresía existente.
 
@@ -202,10 +178,7 @@ class TenantMembershipRepository:
         """
         membership.delete()
 
-    def deactivate(
-        self,
-        membership: TenantMembership
-    ) -> TenantMembership:
+    def deactivate(self, membership: TenantMembership) -> TenantMembership:
         """
         Desactiva una membresía (soft delete).
 
@@ -218,10 +191,7 @@ class TenantMembershipRepository:
         membership.deactivate()
         return membership
 
-    def activate(
-        self,
-        membership: TenantMembership
-    ) -> TenantMembership:
+    def activate(self, membership: TenantMembership) -> TenantMembership:
         """
         Activa una membresía previamente desactivada.
 
@@ -234,11 +204,7 @@ class TenantMembershipRepository:
         membership.activate()
         return membership
 
-    def user_is_admin(
-        self,
-        user_id: int,
-        tenant_id: str
-    ) -> bool:
+    def user_is_admin(self, user_id: int, tenant_id: str) -> bool:
         """
         Verifica si un usuario es administrador de un tenant.
 
@@ -250,17 +216,10 @@ class TenantMembershipRepository:
             bool: True si el usuario es admin del tenant.
         """
         return TenantMembership.objects.filter(
-            user_id=user_id,
-            tenant_id=tenant_id,
-            role=TenantRole.ADMIN,
-            is_active=True
+            user_id=user_id, tenant_id=tenant_id, role=TenantRole.ADMIN, is_active=True
         ).exists()
 
-    def user_is_member(
-        self,
-        user_id: int,
-        tenant_id: str
-    ) -> bool:
+    def user_is_member(self, user_id: int, tenant_id: str) -> bool:
         """
         Verifica si un usuario es miembro de un tenant.
 
@@ -272,7 +231,5 @@ class TenantMembershipRepository:
             bool: True si el usuario es miembro del tenant.
         """
         return TenantMembership.objects.filter(
-            user_id=user_id,
-            tenant_id=tenant_id,
-            is_active=True
+            user_id=user_id, tenant_id=tenant_id, is_active=True
         ).exists()

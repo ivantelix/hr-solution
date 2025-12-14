@@ -7,10 +7,11 @@ a través de repositorios.
 """
 
 from typing import Any
+
 from django.db import transaction
 
 from apps.users.models import User
-from apps.users.repositories import UserRepository
+from apps.users.repositories import UserRepository, UserRepositoryProtocol
 
 
 class UserService:
@@ -25,13 +26,15 @@ class UserService:
         repository: Repositorio de usuarios para acceso a datos.
     """
 
-    def __init__(self, repository: UserRepository | None = None):
+    def __init__(self, repository: UserRepositoryProtocol | None = None):
         """
         Inicializa el servicio con el repositorio.
 
         Args:
-            repository: Repositorio de usuarios. Si no se
-                proporciona, se crea una instancia por defecto.
+            repository: Implementación del repositorio de usuarios.
+                Por defecto usa UserRepository (Django ORM).
+                Puede ser cualquier implementación que cumpla
+                el contrato UserRepositoryProtocol.
         """
         self.repository = repository or UserRepository()
 
@@ -44,7 +47,7 @@ class UserService:
         first_name: str = "",
         last_name: str = "",
         phone: str | None = None,
-        **extra_fields: Any
+        **extra_fields: Any,
     ) -> User:
         """
         Registra un nuevo usuario en el sistema.
@@ -66,15 +69,11 @@ class UserService:
         """
         # Validar que el username no exista
         if self.repository.get_by_username(username):
-            raise ValueError(
-                f"El username '{username}' ya está en uso."
-            )
+            raise ValueError(f"El username '{username}' ya está en uso.")
 
         # Validar que el email no exista
         if self.repository.get_by_email(email):
-            raise ValueError(
-                f"El email '{email}' ya está registrado."
-            )
+            raise ValueError(f"El email '{email}' ya está registrado.")
 
         # Crear el usuario
         user = self.repository.create_user(
@@ -84,17 +83,13 @@ class UserService:
             first_name=first_name,
             last_name=last_name,
             phone=phone,
-            **extra_fields
+            **extra_fields,
         )
 
         return user
 
     @transaction.atomic
-    def update_profile(
-        self,
-        user_id: int,
-        **profile_data: Any
-    ) -> User | None:
+    def update_profile(self, user_id: int, **profile_data: Any) -> User | None:
         """
         Actualiza el perfil de un usuario.
 
@@ -119,8 +114,12 @@ class UserService:
 
         # Campos que no se pueden actualizar por este método
         forbidden_fields = {
-            'username', 'email', 'password',
-            'is_staff', 'is_superuser', 'is_active'
+            "username",
+            "email",
+            "password",
+            "is_staff",
+            "is_superuser",
+            "is_active",
         }
 
         # Validar que no se intenten actualizar campos prohibidos
@@ -135,10 +134,7 @@ class UserService:
 
     @transaction.atomic
     def change_password(
-        self,
-        user_id: int,
-        old_password: str,
-        new_password: str
+        self, user_id: int, old_password: str, new_password: str
     ) -> User | None:
         """
         Cambia la contraseña de un usuario.
@@ -169,11 +165,7 @@ class UserService:
         return user
 
     @transaction.atomic
-    def update_email(
-        self,
-        user_id: int,
-        new_email: str
-    ) -> User | None:
+    def update_email(self, user_id: int, new_email: str) -> User | None:
         """
         Actualiza el email de un usuario.
 
@@ -197,9 +189,7 @@ class UserService:
         # Validar que el nuevo email no esté en uso
         existing_user = self.repository.get_by_email(new_email)
         if existing_user and existing_user.id != user_id:
-            raise ValueError(
-                f"El email '{new_email}' ya está en uso."
-            )
+            raise ValueError(f"El email '{new_email}' ya está en uso.")
 
         # Actualizar email y marcar como no verificado
         user.email = new_email

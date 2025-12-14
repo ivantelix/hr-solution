@@ -1,23 +1,23 @@
 """Serializers de la app tenants."""
 
-from .tenant_serializer import TenantSerializer
-from .tenant_create_serializer import TenantCreateSerializer
-from .tenant_update_serializer import TenantUpdateSerializer
-from .tenant_membership_serializer import TenantMembershipSerializer
 from .add_member_serializer import AddMemberSerializer
-from .update_role_serializer import UpdateRoleSerializer
 from .tenant_ai_config_serializer import (
-    TenantAIConfigSerializer,
     TenantAIConfigCreateSerializer,
+    TenantAIConfigSerializer,
 )
+from .tenant_create_serializer import TenantCreateSerializer
+from .tenant_membership_serializer import TenantMembershipSerializer
+from .tenant_serializer import TenantSerializer
+from .tenant_update_serializer import TenantUpdateSerializer
+from .update_role_serializer import UpdateRoleSerializer
 
 __all__ = [
-    "TenantSerializer",
-    "TenantCreateSerializer",
-    "TenantUpdateSerializer",
-    "TenantMembershipSerializer",
     "AddMemberSerializer",
-    "UpdateRoleSerializer",
-    "TenantAIConfigSerializer",
     "TenantAIConfigCreateSerializer",
+    "TenantAIConfigSerializer",
+    "TenantCreateSerializer",
+    "TenantMembershipSerializer",
+    "TenantSerializer",
+    "TenantUpdateSerializer",
+    "UpdateRoleSerializer",
 ]

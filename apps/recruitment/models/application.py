@@ -6,10 +6,12 @@ un candidato con una vacante.
 """
 
 from django.db import models
+
 from apps.tenants.models import Tenant
-from .job_vacancy import JobVacancy
+
 from .candidate import Candidate
-from .choices import CandidateStatus, ApplicationSource
+from .choices import ApplicationSource, CandidateStatus
+from .job_vacancy import JobVacancy
 
 
 class Application(models.Model):
@@ -35,56 +37,49 @@ class Application(models.Model):
         Tenant,
         on_delete=models.CASCADE,
         related_name="applications",
-        verbose_name="Tenant"
+        verbose_name="Tenant",
     )
 
     vacancy = models.ForeignKey(
         JobVacancy,
         on_delete=models.CASCADE,
         related_name="applications",
-        verbose_name="Vacante"
+        verbose_name="Vacante",
     )
 
     candidate = models.ForeignKey(
         Candidate,
         on_delete=models.CASCADE,
         related_name="applications",
-        verbose_name="Candidato"
+        verbose_name="Candidato",
     )
 
     status = models.CharField(
         max_length=20,
         choices=CandidateStatus.choices,
         default=CandidateStatus.NEW,
-        verbose_name="Estado"
+        verbose_name="Estado",
     )
 
     source = models.CharField(
         max_length=20,
         choices=ApplicationSource.choices,
         default=ApplicationSource.WEBSITE,
-        verbose_name="Fuente"
+        verbose_name="Fuente",
     )
 
     score = models.FloatField(
-        default=0.0,
-        verbose_name="Puntaje",
-        help_text="Puntaje de evaluación (0-100)"
+        default=0.0, verbose_name="Puntaje", help_text="Puntaje de evaluación (0-100)"
     )
 
-    notes = models.TextField(
-        blank=True,
-        verbose_name="Notas Internas"
-    )
+    notes = models.TextField(blank=True, verbose_name="Notas Internas")
 
     applied_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Fecha de Postulación"
+        auto_now_add=True, verbose_name="Fecha de Postulación"
     )
 
     updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Fecha de Actualización"
+        auto_now=True, verbose_name="Fecha de Actualización"
     )
 
     class Meta:

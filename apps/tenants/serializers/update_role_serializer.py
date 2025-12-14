@@ -6,6 +6,7 @@ de un miembro en un tenant.
 """
 
 from rest_framework import serializers
+
 from apps.tenants.models import TenantRole
 
 
@@ -17,7 +18,5 @@ class UpdateRoleSerializer(serializers.Serializer):
     """
 
     role = serializers.ChoiceField(
-        choices=TenantRole.choices,
-        required=True,
-        help_text="Nuevo rol a asignar"
+        choices=TenantRole.choices, required=True, help_text="Nuevo rol a asignar"
     )

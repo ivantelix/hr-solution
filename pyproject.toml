@@ -1,0 +1,167 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hr-solution"
+version = "0.1.0"
+description = "HR Solution - Sistema de gestión de recursos humanos"
+requires-python = ">=3.12"
+
+# ===== RUFF CONFIGURATION =====
+[tool.ruff]
+# Longitud de línea
+line-length = 88
+target-version = "py312"
+
+# Excluir directorios
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "*.pyc",
+    "migrations",
+    "staticfiles",
+    "media",
+]
+
+[tool.ruff.lint]
+# Reglas a activar
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort (import sorting)
+    "B",     # flake8-bugbear
+    "C4",    # flake8-comprehensions
+    "UP",    # pyupgrade
+    "N",     # pep8-naming
+    "SIM",   # flake8-simplify
+    "RUF",   # Ruff-specific rules
+]
+
+# Reglas a ignorar
+ignore = [
+    "E501",  # line too long (manejado por formatter)
+    "B008",  # do not perform function calls in argument defaults (común en Django)
+    "N805",  # first argument of a method should be named 'self' (Django Meta)
+    "N815",  # mixedCase variable (común en Django)
+]
+
+# Permitir autofix para estas reglas
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+# Ignorar imports no usados en __init__.py
+"__init__.py" = ["F401", "F403"]
+# Ignorar en settings (wildcard imports son normales aquí)
+"*/settings/*.py" = ["F403", "F405"]
+# Ignorar RUF012 en modelos de Django (Meta classes son correctas)
+"*/models/*.py" = ["RUF012"]
+# Ignorar RUF012 en serializers de DRF (Meta classes son correctas)
+"*/serializers/*.py" = ["RUF012"]
+# Ignorar RUF012 en views (permission_classes es correcto)
+"*/views/*.py" = ["RUF012"]
+# Ignorar RUF012 en middleware (atributos de clase son correctos)
+"*/middleware/*.py" = ["RUF012"]
+
+[tool.ruff.lint.isort]
+# Configuración de import sorting
+known-first-party = ["apps", "core"]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+
+[tool.ruff.format]
+# Formato de código
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# ===== MYPY CONFIGURATION =====
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # Cambiar a true cuando todo esté tipado
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_optional = true
+strict_optional = true
+
+# Django plugin
+plugins = ["mypy_django_plugin.main"]
+
+# Paths
+mypy_path = "$MYPY_CONFIG_FILE_DIR"
+exclude = [
+    "migrations/",
+    "venv/",
+    ".venv/",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "rest_framework.*",
+    "django_filters.*",
+]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "core.settings.dev"
+
+# ===== PYTEST CONFIGURATION =====
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "core.settings.test"
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+testpaths = ["apps"]
+
+# Opciones adicionales
+addopts = [
+    "--reuse-db",
+    "--nomigrations",
+    "--cov=apps",
+    "--cov-report=html",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-fail-under=80",
+    "-v",
+]
+
+# Markers
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+# ===== COVERAGE CONFIGURATION =====
+[tool.coverage.run]
+source = ["apps"]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]

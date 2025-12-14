@@ -5,25 +5,22 @@ Este módulo implementa el patrón Repository para JobVacancy.
 """
 
 from typing import Protocol
+
 from django.db.models import QuerySet
 
-from apps.recruitment.models import JobVacancy, JobStatus
+from apps.recruitment.models import JobStatus, JobVacancy
 
 
 class JobVacancyRepositoryProtocol(Protocol):
     """Interface para el repositorio de vacantes."""
 
-    def get_by_id(self, vacancy_id: int) -> JobVacancy | None:
-        ...
+    def get_by_id(self, vacancy_id: int) -> JobVacancy | None: ...
 
-    def get_by_tenant(self, tenant_id: str) -> QuerySet[JobVacancy]:
-        ...
+    def get_by_tenant(self, tenant_id: str) -> QuerySet[JobVacancy]: ...
 
-    def create(self, **kwargs) -> JobVacancy:
-        ...
+    def create(self, **kwargs) -> JobVacancy: ...
 
-    def update(self, vacancy: JobVacancy, **kwargs) -> JobVacancy:
-        ...
+    def update(self, vacancy: JobVacancy, **kwargs) -> JobVacancy: ...
 
 
 class JobVacancyRepository:
@@ -38,13 +35,9 @@ class JobVacancyRepository:
     def get_by_tenant(self, tenant_id: str) -> QuerySet[JobVacancy]:
         return JobVacancy.objects.filter(tenant_id=tenant_id)
 
-    def get_published_by_tenant(
-        self,
-        tenant_id: str
-    ) -> QuerySet[JobVacancy]:
+    def get_published_by_tenant(self, tenant_id: str) -> QuerySet[JobVacancy]:
         return JobVacancy.objects.filter(
-            tenant_id=tenant_id,
-            status=JobStatus.PUBLISHED
+            tenant_id=tenant_id, status=JobStatus.PUBLISHED
         )
 
     def create(self, **kwargs) -> JobVacancy:

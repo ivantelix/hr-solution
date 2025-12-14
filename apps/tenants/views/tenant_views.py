@@ -5,19 +5,19 @@ Este módulo contiene el ViewSet de Django Rest Framework
 para el modelo Tenant, proporcionando endpoints REST.
 """
 
-from rest_framework import viewsets, status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
+from rest_framework.response import Response
 
 from apps.tenants.models import Tenant
-from apps.tenants.services import TenantService
 from apps.tenants.serializers import (
-    TenantSerializer,
     TenantCreateSerializer,
+    TenantSerializer,
     TenantUpdateSerializer,
 )
+from apps.tenants.services import TenantService
 
 
 class TenantViewSet(viewsets.ModelViewSet):
@@ -52,8 +52,7 @@ class TenantViewSet(viewsets.ModelViewSet):
         """
         user = self.request.user
         return Tenant.objects.filter(
-            tenantmembership__user=user,
-            tenantmembership__is_active=True
+            tenantmembership__user=user, tenantmembership__is_active=True
         ).distinct()
 
     def get_serializer_class(self):
@@ -63,9 +62,9 @@ class TenantViewSet(viewsets.ModelViewSet):
         Returns:
             Serializer: Clase de serializer apropiada.
         """
-        if self.action == 'create':
+        if self.action == "create":
             return TenantCreateSerializer
-        elif self.action in ['update', 'partial_update']:
+        elif self.action in ["update", "partial_update"]:
             return TenantUpdateSerializer
         return TenantSerializer
 
@@ -83,19 +82,13 @@ class TenantViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         try:
-            tenant = self.service.create_tenant(
-                **serializer.validated_data
-            )
+            tenant = self.service.create_tenant(**serializer.validated_data)
 
             return Response(
-                TenantSerializer(tenant).data,
-                status=status.HTTP_201_CREATED
+                TenantSerializer(tenant).data, status=status.HTTP_201_CREATED
             )
         except ValueError as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request: Request, pk=None) -> Response:
         """
@@ -113,31 +106,19 @@ class TenantViewSet(viewsets.ModelViewSet):
 
         try:
             tenant = self.service.update_tenant(
-                tenant_id=pk,
-                **serializer.validated_data
+                tenant_id=pk, **serializer.validated_data
             )
 
             if not tenant:
                 return Response(
-                    {'error': 'Tenant no encontrado'},
-                    status=status.HTTP_404_NOT_FOUND
+                    {"error": "Tenant no encontrado"}, status=status.HTTP_404_NOT_FOUND
                 )
 
-            return Response(
-                TenantSerializer(tenant).data,
-                status=status.HTTP_200_OK
-            )
+            return Response(TenantSerializer(tenant).data, status=status.HTTP_200_OK)
         except ValueError as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    def partial_update(
-        self,
-        request: Request,
-        pk=None
-    ) -> Response:
+    def partial_update(self, request: Request, pk=None) -> Response:
         """
         Actualiza parcialmente un tenant.
 
@@ -148,35 +129,24 @@ class TenantViewSet(viewsets.ModelViewSet):
         Returns:
             Response: Tenant actualizado o error.
         """
-        serializer = self.get_serializer(
-            data=request.data,
-            partial=True
-        )
+        serializer = self.get_serializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
         try:
             tenant = self.service.update_tenant(
-                tenant_id=pk,
-                **serializer.validated_data
+                tenant_id=pk, **serializer.validated_data
             )
 
             if not tenant:
                 return Response(
-                    {'error': 'Tenant no encontrado'},
-                    status=status.HTTP_404_NOT_FOUND
+                    {"error": "Tenant no encontrado"}, status=status.HTTP_404_NOT_FOUND
                 )
 
-            return Response(
-                TenantSerializer(tenant).data,
-                status=status.HTTP_200_OK
-            )
+            return Response(TenantSerializer(tenant).data, status=status.HTTP_200_OK)
         except ValueError as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def deactivate(self, request: Request, pk=None) -> Response:
         """
         Desactiva un tenant.
@@ -192,16 +162,14 @@ class TenantViewSet(viewsets.ModelViewSet):
 
         if not tenant:
             return Response(
-                {'error': 'Tenant no encontrado'},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Tenant no encontrado"}, status=status.HTTP_404_NOT_FOUND
             )
 
         return Response(
-            {'message': 'Tenant desactivado exitosamente'},
-            status=status.HTTP_200_OK
+            {"message": "Tenant desactivado exitosamente"}, status=status.HTTP_200_OK
         )
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def activate(self, request: Request, pk=None) -> Response:
         """
         Activa un tenant previamente desactivado.
@@ -217,11 +185,9 @@ class TenantViewSet(viewsets.ModelViewSet):
 
         if not tenant:
             return Response(
-                {'error': 'Tenant no encontrado'},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Tenant no encontrado"}, status=status.HTTP_404_NOT_FOUND
             )
 
         return Response(
-            {'message': 'Tenant activado exitosamente'},
-            status=status.HTTP_200_OK
+            {"message": "Tenant activado exitosamente"}, status=status.HTTP_200_OK
         )

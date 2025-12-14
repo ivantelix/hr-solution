@@ -5,18 +5,16 @@ Este módulo contiene las tools relacionadas con LinkedIn que pueden
 ser utilizadas por los agentes de IA.
 """
 
-from typing import Dict, List, Optional
 from langchain_core.tools import tool
+
 from .registry import ToolRegistry
 
 
 @ToolRegistry.register("linkedin_search_tool")
 @tool
 def search_linkedin_profiles(
-    query: str,
-    location: Optional[str] = None,
-    max_results: int = 10
-) -> Dict[str, List[Dict]]:
+    query: str, location: str | None = None, max_results: int = 10
+) -> dict[str, list[dict]]:
     """
     Busca perfiles en LinkedIn basándose en criterios específicos.
 
@@ -64,7 +62,7 @@ def search_linkedin_profiles(
 
 @ToolRegistry.register("get_linkedin_profile_details")
 @tool
-def get_linkedin_profile_details(linkedin_url: str) -> Dict:
+def get_linkedin_profile_details(linkedin_url: str) -> dict:
     """
     Obtiene detalles completos de un perfil de LinkedIn.
 
@@ -111,7 +109,7 @@ def get_linkedin_profile_details(linkedin_url: str) -> Dict:
 
 @ToolRegistry.register("extract_skills_from_profile")
 @tool
-def extract_skills_from_profile(profile_data: Dict) -> List[str]:
+def extract_skills_from_profile(profile_data: dict) -> list[str]:
     """
     Extrae y normaliza las habilidades de un perfil.
 
@@ -130,6 +128,6 @@ def extract_skills_from_profile(profile_data: Dict) -> List[str]:
     skills = profile_data.get("skills", [])
 
     # Normalizar (convertir a lowercase, eliminar duplicados)
-    normalized_skills = list(set(skill.lower() for skill in skills))
+    normalized_skills = list({skill.lower() for skill in skills})
 
     return sorted(normalized_skills)

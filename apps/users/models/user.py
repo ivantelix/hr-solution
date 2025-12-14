@@ -33,20 +33,20 @@ class User(AbstractUser):
         blank=True,
         null=True,
         verbose_name="Teléfono",
-        help_text="Número de teléfono del usuario"
+        help_text="Número de teléfono del usuario",
     )
 
     avatar = models.URLField(
         blank=True,
         null=True,
         verbose_name="Avatar",
-        help_text="URL del avatar del usuario"
+        help_text="URL del avatar del usuario",
     )
 
     is_email_verified = models.BooleanField(
         default=False,
         verbose_name="Email Verificado",
-        help_text="Indica si el correo ha sido verificado"
+        help_text="Indica si el correo ha sido verificado",
     )
 
     class Meta:
@@ -87,7 +87,4 @@ class User(AbstractUser):
             Requiere que la app tenants esté instalada y el modelo
             TenantMembership exista.
         """
-        return self.tenants.filter(
-            tenantmembership__is_active=True
-        ).distinct()
-
+        return self.tenants.filter(tenantmembership__is_active=True).distinct()

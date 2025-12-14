@@ -4,10 +4,10 @@ Serializer para creación de Tenant.
 Este módulo maneja la validación y creación de nuevos tenants.
 """
 
-from rest_framework import serializers
 from django.utils.text import slugify
+from rest_framework import serializers
 
-from apps.tenants.models import Tenant, PlanType
+from apps.tenants.models import Tenant
 
 
 class TenantCreateSerializer(serializers.ModelSerializer):
@@ -21,17 +21,16 @@ class TenantCreateSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(
         required=False,
         allow_blank=True,
-        help_text="Slug único (se genera automáticamente si no se "
-                  "proporciona)"
+        help_text="Slug único (se genera automáticamente si no se proporciona)",
     )
 
     class Meta:
         model = Tenant
         fields = [
-            'name',
-            'slug',
-            'plan',
-            'max_users',
+            "name",
+            "slug",
+            "plan",
+            "max_users",
         ]
 
     def validate_slug(self, value: str) -> str:
@@ -48,9 +47,7 @@ class TenantCreateSerializer(serializers.ModelSerializer):
             ValidationError: Si el slug ya está en uso.
         """
         if value and Tenant.objects.filter(slug=value).exists():
-            raise serializers.ValidationError(
-                "Este slug ya está en uso."
-            )
+            raise serializers.ValidationError("Este slug ya está en uso.")
         return value
 
     def validate_max_users(self, value: int) -> int:
@@ -83,16 +80,14 @@ class TenantCreateSerializer(serializers.ModelSerializer):
             Tenant: Tenant creado.
         """
         # Generar slug si no se proporcionó
-        if not validated_data.get('slug'):
-            validated_data['slug'] = slugify(validated_data['name'])
+        if not validated_data.get("slug"):
+            validated_data["slug"] = slugify(validated_data["name"])
 
             # Asegurar unicidad del slug
-            base_slug = validated_data['slug']
+            base_slug = validated_data["slug"]
             counter = 1
-            while Tenant.objects.filter(
-                slug=validated_data['slug']
-            ).exists():
-                validated_data['slug'] = f"{base_slug}-{counter}"
+            while Tenant.objects.filter(slug=validated_data["slug"]).exists():
+                validated_data["slug"] = f"{base_slug}-{counter}"
                 counter += 1
 
         return Tenant.objects.create(**validated_data)

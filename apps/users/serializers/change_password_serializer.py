@@ -16,20 +16,13 @@ class ChangePasswordSerializer(serializers.Serializer):
     """
 
     old_password = serializers.CharField(
-        required=True,
-        write_only=True,
-        style={'input_type': 'password'}
+        required=True, write_only=True, style={"input_type": "password"}
     )
     new_password = serializers.CharField(
-        required=True,
-        write_only=True,
-        min_length=8,
-        style={'input_type': 'password'}
+        required=True, write_only=True, min_length=8, style={"input_type": "password"}
     )
     new_password_confirm = serializers.CharField(
-        required=True,
-        write_only=True,
-        style={'input_type': 'password'}
+        required=True, write_only=True, style={"input_type": "password"}
     )
 
     def validate(self, attrs: dict) -> dict:
@@ -45,8 +38,8 @@ class ChangePasswordSerializer(serializers.Serializer):
         Raises:
             ValidationError: Si las contraseñas no coinciden.
         """
-        if attrs['new_password'] != attrs['new_password_confirm']:
-            raise serializers.ValidationError({
-                'new_password_confirm': "Las contraseñas no coinciden."
-            })
+        if attrs["new_password"] != attrs["new_password_confirm"]:
+            raise serializers.ValidationError(
+                {"new_password_confirm": "Las contraseñas no coinciden."}
+            )
         return attrs
