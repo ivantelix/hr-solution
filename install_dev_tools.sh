@@ -3,39 +3,29 @@
 # Script para instalar herramientas de desarrollo
 # Uso: ./install_dev_tools.sh
 
-echo "🔧 Instalando herramientas de desarrollo..."
+echo "🔧 Instalando dependencias del proyecto..."
 
 # Activar entorno virtual
-source venv/bin/activate
+if [ -f "venv/bin/activate" ]; then
+    source venv/bin/activate
+else
+    echo "⚠️  No se encontró el entorno virtual en 'venv/'. Asegúrate de haberlo creado."
+    exit 1
+fi
 
 # Actualizar pip
 echo "📦 Actualizando pip..."
 pip install --upgrade pip
 
-# Instalar herramientas de linting y type checking
-echo "🔍 Instalando Ruff (linter + formatter)..."
-pip install ruff
+# Instalar dependencias desde requirements.txt (que incluye herramientas de desarrollo)
+echo "📥 Instalando paquetes desde requirements.txt..."
+pip install -r requirements.txt
 
-echo "🔍 Instalando mypy (type checker)..."
-pip install mypy
-
-echo "🔍 Instalando django-stubs (type stubs para Django)..."
-pip install django-stubs[compatible-mypy]
-
-echo "🔍 Instalando djangorestframework-stubs..."
-pip install djangorestframework-stubs
-
-# Instalar herramientas de testing
-echo "✅ Instalando pytest y plugins..."
-pip install pytest pytest-django pytest-cov pytest-mock
-
-# Instalar pre-commit (opcional pero recomendado)
-echo "🪝 Instalando pre-commit..."
-pip install pre-commit
-
-# Guardar dependencias
-echo "💾 Actualizando requirements..."
-pip freeze > requirements-dev.txt
+# Configurar pre-commit si está instalado
+if command -v pre-commit &> /dev/null; then
+    echo "🪝 Configurando pre-commit hooks..."
+    pre-commit install
+fi
 
 echo ""
 echo "✅ ¡Instalación completa!"
@@ -46,5 +36,4 @@ echo "  - ruff check . --fix        # Arreglar automáticamente"
 echo "  - ruff format .             # Formatear código"
 echo "  - mypy apps/                # Type checking"
 echo "  - pytest                    # Ejecutar tests"
-echo "  - pre-commit install        # Configurar hooks de git"
 echo ""

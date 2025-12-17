@@ -28,10 +28,12 @@ class TenantRole(models.TextChoices):
     Define los roles disponibles dentro de un tenant.
 
     Attributes:
+        OWNER: Dueño del tenant (creador, permisos máximos).
         ADMIN: Administrador con permisos completos del tenant.
         MEMBER: Miembro con permisos limitados.
     """
 
+    OWNER = "owner", "Dueño"
     ADMIN = "admin", "Administrador"
     MEMBER = "member", "Miembro"
 
