@@ -175,3 +175,4 @@ CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutos
 # AI Provider Configuration (LangChain)
 OPENAI_API_KEY_GLOBAL = os.environ.get('OPENAI_API_KEY', '')
 CLAUDE_API_KEY_GLOBAL = os.environ.get('CLAUDE_API_KEY', '')
+GEMINI_API_KEY_GLOBAL = os.environ.get('GEMINI_API_KEY', '')

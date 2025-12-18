@@ -7,8 +7,9 @@ djangorestframework-simplejwt
 django-cors-headers
 celery
 redis
-langchain
-langchain-openai
-langchain-anthropic
+langchain==0.3.13
+langchain-openai==0.2.14
+langchain-anthropic==0.3.3
+langchain-google-genai==2.0.8
 langgraph
 langfuse

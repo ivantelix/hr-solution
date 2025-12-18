@@ -41,9 +41,11 @@ class AIProvider(models.TextChoices):
     Attributes:
         OPENAI: OpenAI (GPT-3.5, GPT-4, etc.).
         CLAUDE: Anthropic Claude.
+        GEMINI: Google Gemini.
         LLAMA: Meta Llama (local o API).
     """
     PLATFORM_DEFAULT = "platform_default", "Default de la Plataforma"
     OPENAI = "openai", "OpenAI"
     CLAUDE = "claude", "Anthropic Claude"
+    GEMINI = "gemini", "Google Gemini"
     LLAMA = "llama", "Meta Llama"

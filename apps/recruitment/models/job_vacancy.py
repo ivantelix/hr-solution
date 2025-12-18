@@ -35,6 +35,16 @@ class JobVacancy(models.Model):
         closed_at (datetime): Fecha de cierre.
     """
 
+    class InterviewMode(models.TextChoices):
+        AUTO = "auto", "Entrevista por IA"
+        MANUAL = "manual", "Entrevista Manual (Humano)"
+
+    interview_mode = models.CharField(
+        max_length=10,
+        choices=InterviewMode.choices,
+        default=InterviewMode.AUTO
+    )
+
     tenant = models.ForeignKey(
         Tenant,
         on_delete=models.CASCADE,
@@ -119,6 +129,8 @@ class JobVacancy(models.Model):
         blank=True,
         verbose_name="Fecha de Cierre"
     )
+
+    manual_interview_guide = models.TextField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Vacante"
