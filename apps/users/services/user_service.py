@@ -290,3 +290,97 @@ class UserService:
             list[User]: Lista de usuarios del tenant.
         """
         return self.repository.filter_by_tenant(tenant_id)
+
+    @transaction.atomic
+    def invite_user(
+        self,
+        tenant_id: str,
+        email: str,
+        role: str,
+        invited_by: User,
+        first_name: str = "",
+        last_name: str = "",
+    ) -> dict:
+        """
+        Invita a un usuario a un tenant.
+
+        Si el usuario no existe, lo crea.
+        Si ya existe, solo lo agrega al tenant.
+
+        Args:
+            tenant_id: ID del tenant al que se invita.
+            email: Email del usuario invitado.
+            role: Rol que tendrá en el tenant.
+            invited_by: Usuario que envía la invitación.
+            first_name: Nombre del invitado (opcional).
+            last_name: Apellido del invitado (opcional).
+
+        Returns:
+            dict: Diccionario con 'user', 'created' y 'membership'.
+        """
+        from django.utils.crypto import get_random_string
+
+        from apps.tenants.models import Tenant, TenantMembership
+
+        # Verificar que el tenant exista
+        try:
+            tenant = Tenant.objects.get(id=tenant_id)
+        except Tenant.DoesNotExist:
+            raise ValueError("El tenant especificado no existe.")
+
+        # Verificar límites del plan
+        if not tenant.can_add_member():
+            raise ValueError(
+                "Se ha alcanzado el límite de usuarios para este plan."
+            )
+
+        # Buscar usuario o crear uno nuevo
+        user = self.repository.get_by_email(email)
+        created = False
+
+        if not user:
+            # Crear usuario con contraseña aleatoria
+            username = email  # Usar email como username inicial
+            if self.repository.get_by_username(username):
+                # Si el username existe (ej: otro email con mismo user local part), generar uno random
+                username = (
+                    f"{email.split('@')[0]}_{get_random_string(4)}"
+                )
+
+            random_password = get_random_string(12)
+            user = self.repository.create_user(
+                username=username,
+                email=email,
+                password=random_password,
+                first_name=first_name,
+                last_name=last_name,
+                is_active=True,  # Activo para que pueda loguearse
+            )
+            created = True
+            # TODO: Enviar email de bienvenida con link de setup password
+
+        # Verificar si ya pertenece al tenant
+        if TenantMembership.objects.filter(
+            tenant=tenant, user=user, is_active=True
+        ).exists():
+            raise ValueError(
+                f"El usuario {email} ya es miembro activo de este tenant."
+            )
+
+        # Crear o reactivar membresía
+        membership, _ = TenantMembership.objects.update_or_create(
+            tenant=tenant,
+            user=user,
+            defaults={
+                "role": role,
+                "is_active": True,
+                "invited_by": invited_by,
+            },
+        )
+
+        return {
+            "user": user,
+            "created": created,
+            "membership": membership,
+            "tenant": tenant,
+        }

@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from apps.users.models import User
 from apps.users.serializers import (
     ChangePasswordSerializer,
+    InviteUserSerializer,
     UpdateEmailSerializer,
     UserCreateSerializer,
     UserSerializer,
@@ -33,6 +34,7 @@ class UserViewSet(viewsets.ModelViewSet):
     Endpoints:
         - GET /users/ - Lista de usuarios
         - POST /users/ - Crear usuario
+        - POST /users/invite/ - Invitar usuario a tenant
         - GET /users/{id}/ - Detalle de usuario
         - PUT /users/{id}/ - Actualizar usuario completo
         - PATCH /users/{id}/ - Actualizar usuario parcial
@@ -78,6 +80,8 @@ class UserViewSet(viewsets.ModelViewSet):
             return ChangePasswordSerializer
         elif self.action == "update_email":
             return UpdateEmailSerializer
+        elif self.action == "invite":
+            return InviteUserSerializer
         return UserSerializer
 
     def create(self, request: Request) -> Response:
@@ -106,6 +110,72 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=["post"])
+    def invite(self, request: Request) -> Response:
+        """
+        Invita a un usuario al tenant actual.
+
+        Args:
+            request: Request con email y rol.
+
+        Returns:
+            Response: Detalles de la invitación.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # TODO: Obtener tenant real del request (middleware o header)
+        # Por ahora asumimos que el usuario tiene un tenant activo
+        # Si tienes el TenantMiddleware implementado: request.tenant.id
+        # Si no, buscamos el primer tenant activo del usuario
+        user = request.user
+        active_tenants = user.get_active_tenants()
+
+        if not active_tenants.exists():
+            return Response(
+                {
+                    "error": (
+                        "No tienes ningún tenant activo para invitar usuarios."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Usamos el primer tenant activo por defecto
+        # En el futuro, esto debería venir en el header X-Tenant-ID
+        tenant = active_tenants.first()
+
+        try:
+            result = self.service.invite_user(
+                tenant_id=tenant.id,
+                email=serializer.validated_data["email"],
+                role=serializer.validated_data["role"],
+                invited_by=user,
+                first_name=serializer.validated_data.get("first_name", ""),
+                last_name=serializer.validated_data.get("last_name", ""),
+            )
+
+            message = (
+                "Usuario invitado exitosamente."
+                if not result["created"]
+                else "Usuario creado e invitado exitosamente."
+            )
+
+            return Response(
+                {
+                    "message": message,
+                    "user": UserSerializer(result["user"]).data,
+                    "role": result["membership"].role,
+                    "tenant": str(tenant.name),
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except ValueError as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+            )
 
     def update(self, request: Request, pk=None) -> Response:
         """

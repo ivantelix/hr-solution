@@ -10,6 +10,53 @@
 			"name": "1. Auth",
 			"item": [
 				{
+					"name": "Register Tenant Owner",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.tokens) {",
+									"    pm.environment.set(\"access_token\", jsonData.tokens.access);",
+									"    pm.environment.set(\"refresh_token\", jsonData.tokens.refresh);",
+									"}",
+									"if (jsonData.tenant) {",
+									"    pm.environment.set(\"tenant_id\", jsonData.tenant.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"new_owner\",\n    \"email\": \"owner@newcompany.com\",\n    \"password\": \"Security123!\",\n    \"password_confirm\": \"Security123!\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"phone\": \"+1234567890\",\n    \"company_name\": \"New Company LLC\",\n    \"company_slug\": \"new-company\",\n    \"industry\": \"Technology\",\n    \"plan\": \"basic\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Login (Get Token)",
 					"event": [
 						{
@@ -85,13 +132,48 @@
 			"name": "2. Users",
 			"item": [
 				{
-					"name": "Register User",
+					"name": "Invite User to Tenant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"new.employee@company.com\",\n    \"first_name\": \"Peter\",\n    \"last_name\": \"Smith\",\n    \"role\": \"member\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/invite/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"invite",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register User (Orphan - Legacy)",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"admin_user\",\n    \"email\": \"admin@company.com\",\n    \"password\": \"securepassword123\",\n    \"password_confirm\": \"securepassword123\",\n    \"first_name\": \"Admin\",\n    \"last_name\": \"User\"\n}",
+							"raw": "{\n    \"username\": \"orphan_user\",\n    \"email\": \"orphan@example.com\",\n    \"password\": \"secure123\",\n    \"password_confirm\": \"secure123\",\n    \"first_name\": \"Orphan\",\n    \"last_name\": \"User\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -139,183 +221,184 @@
 					"response": []
 				}
 			]
-		},
-		{
-			"name": "3. Tenants",
-			"item": [
-				{
-					"name": "Create Tenant",
-					"event": [
+		]
+	},
+	{
+		"name": "3. Tenants",
+		"item": [
+			{
+				"name": "Create Tenant",
+				"event": [
+					{
+						"listen": "test",
+						"script": {
+							"exec": [
+								"var jsonData = pm.response.json();",
+								"pm.environment.set(\"tenant_id\", jsonData.id);"
+							],
+							"type": "text/javascript"
+						}
+					}
+				],
+				"request": {
+					"method": "POST",
+					"header": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"tenant_id\", jsonData.id);"
-								],
-								"type": "text/javascript"
-							}
+							"key": "Authorization",
+							"value": "Bearer {{access_token}}",
+							"type": "text"
 						}
 					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}",
-								"type": "text"
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"name\": \"Tech Solutions Inc.\",\n    \"plan\": \"pro\",\n    \"max_users\": 10\n}",
+						"options": {
+							"raw": {
+								"language": "json"
 							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Tech Solutions Inc.\",\n    \"plan\": \"pro\",\n    \"max_users\": 10\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/api/tenants/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"tenants",
-								""
-							]
 						}
 					},
-					"response": []
+					"url": {
+						"raw": "{{base_url}}/api/tenants/",
+						"host": [
+							"{{base_url}}"
+						],
+						"path": [
+							"api",
+							"tenants",
+							""
+						]
+					}
 				},
-				{
-					"name": "List My Tenants",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/tenants/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"tenants",
-								""
-							]
+				"response": []
+			},
+			{
+				"name": "List My Tenants",
+				"request": {
+					"method": "GET",
+					"header": [
+						{
+							"key": "Authorization",
+							"value": "Bearer {{access_token}}",
+							"type": "text"
 						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "4. Recruitment",
-			"item": [
-				{
-					"name": "Create Vacancy",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}",
-								"type": "text"
-							}
+					],
+					"url": {
+						"raw": "{{base_url}}/api/tenants/",
+						"host": [
+							"{{base_url}}"
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"title\": \"Senior Python Developer\",\n    \"description\": \"We are looking for an expert in Django and DDD.\",\n    \"requirements\": \"5+ years experience with Python.\",\n    \"location\": \"Remote\",\n    \"salary_min\": 4000,\n    \"salary_max\": 6000,\n    \"currency\": \"USD\",\n    \"is_remote\": true\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/api/recruitment/vacancies/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"recruitment",
-								"vacancies",
-								""
-							]
-						}
-					},
-					"response": []
+						"path": [
+							"api",
+							"tenants",
+							""
+						]
+					}
 				},
-				{
-					"name": "List Vacancies",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}",
-								"type": "text"
+				"response": []
+			}
+		]
+	},
+	{
+		"name": "4. Recruitment",
+		"item": [
+			{
+				"name": "Create Vacancy",
+				"request": {
+					"method": "POST",
+					"header": [
+						{
+							"key": "Authorization",
+							"value": "Bearer {{access_token}}",
+							"type": "text"
+						}
+					],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"title\": \"Senior Python Developer\",\n    \"description\": \"We are looking for an expert in Django and DDD.\",\n    \"requirements\": \"5+ years experience with Python.\",\n    \"location\": \"Remote\",\n    \"salary_min\": 4000,\n    \"salary_max\": 6000,\n    \"currency\": \"USD\",\n    \"is_remote\": true\n}",
+						"options": {
+							"raw": {
+								"language": "json"
 							}
+						}
+					},
+					"url": {
+						"raw": "{{base_url}}/api/recruitment/vacancies/",
+						"host": [
+							"{{base_url}}"
 						],
-						"url": {
-							"raw": "{{base_url}}/api/recruitment/vacancies/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"recruitment",
-								"vacancies",
-								""
-							]
-						}
-					},
-					"response": []
+						"path": [
+							"api",
+							"recruitment",
+							"vacancies",
+							""
+						]
+					}
 				},
-				{
-					"name": "Apply (Public)",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"vacancy_id\": 1,\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"linkedin_url\": \"https://linkedin.com/in/johndoe\",\n    \"source\": \"linkedin\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
+				"response": []
+			},
+			{
+				"name": "List Vacancies",
+				"request": {
+					"method": "GET",
+					"header": [
+						{
+							"key": "Authorization",
+							"value": "Bearer {{access_token}}",
+							"type": "text"
+						}
+					],
+					"url": {
+						"raw": "{{base_url}}/api/recruitment/vacancies/",
+						"host": [
+							"{{base_url}}"
+						],
+						"path": [
+							"api",
+							"recruitment",
+							"vacancies",
+							""
+						]
+					}
+				},
+				"response": []
+			},
+			{
+				"name": "Apply (Public)",
+				"request": {
+					"method": "POST",
+					"header": [],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"vacancy_id\": 1,\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"linkedin_url\": \"https://linkedin.com/in/johndoe\",\n    \"source\": \"linkedin\"\n}",
+						"options": {
+							"raw": {
+								"language": "json"
 							}
-						},
-						"url": {
-							"raw": "{{base_url}}/api/recruitment/applications/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"recruitment",
-								"applications",
-								""
-							]
 						}
 					},
-					"response": []
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8000"
-		}
-	]
+					"url": {
+						"raw": "{{base_url}}/api/recruitment/applications/",
+						"host": [
+							"{{base_url}}"
+						],
+						"path": [
+							"api",
+							"recruitment",
+							"applications",
+							""
+						]
+					}
+				},
+				"response": []
+			}
+		]
+	}
+],
+"variable": [
+	{
+		"key": "base_url",
+		"value": "http://localhost:8000"
+	}
+]
 }
