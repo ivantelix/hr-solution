@@ -5,6 +5,7 @@ Este módulo maneja la actualización de campos del tenant.
 """
 
 from rest_framework import serializers
+
 from apps.tenants.models import Tenant
 
 
@@ -19,9 +20,9 @@ class TenantUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tenant
         fields = [
-            'name',
-            'slug',
-            'max_users',
+            "name",
+            "slug",
+            "max_users",
         ]
 
     def validate_slug(self, value: str) -> str:
@@ -38,12 +39,8 @@ class TenantUpdateSerializer(serializers.ModelSerializer):
             ValidationError: Si el slug ya está en uso.
         """
         tenant = self.instance
-        if Tenant.objects.filter(slug=value).exclude(
-            id=tenant.id
-        ).exists():
-            raise serializers.ValidationError(
-                "Este slug ya está en uso."
-            )
+        if Tenant.objects.filter(slug=value).exclude(id=tenant.id).exists():
+            raise serializers.ValidationError("Este slug ya está en uso.")
         return value
 
     def validate_max_users(self, value: int) -> int:

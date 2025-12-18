@@ -1,23 +1,23 @@
 """Repositorios de la app recruitment."""
 
-from .job_vacancy_repository import (
-    JobVacancyRepository,
-    JobVacancyRepositoryProtocol,
+from .application_repository import (
+    ApplicationRepository,
+    ApplicationRepositoryProtocol,
 )
 from .candidate_repository import (
     CandidateRepository,
     CandidateRepositoryProtocol,
 )
-from .application_repository import (
-    ApplicationRepository,
-    ApplicationRepositoryProtocol,
+from .job_vacancy_repository import (
+    JobVacancyRepository,
+    JobVacancyRepositoryProtocol,
 )
 
 __all__ = [
-    "JobVacancyRepository",
-    "JobVacancyRepositoryProtocol",
-    "CandidateRepository",
-    "CandidateRepositoryProtocol",
     "ApplicationRepository",
     "ApplicationRepositoryProtocol",
+    "CandidateRepository",
+    "CandidateRepositoryProtocol",
+    "JobVacancyRepository",
+    "JobVacancyRepositoryProtocol",
 ]

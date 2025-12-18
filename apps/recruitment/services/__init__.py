@@ -1,9 +1,9 @@
 """Servicios de la app recruitment."""
 
-from .job_vacancy_service import JobVacancyService
 from .application_service import ApplicationService
+from .job_vacancy_service import JobVacancyService
 
 __all__ = [
-    "JobVacancyService",
     "ApplicationService",
+    "JobVacancyService",
 ]

@@ -17,6 +17,7 @@ class PlanType(models.TextChoices):
         PRO: Plan profesional con funcionalidades avanzadas.
         ENTERPRISE: Plan empresarial con todas las funcionalidades.
     """
+
     BASIC = "basic", "Básico"
     PRO = "pro", "Pro"
     ENTERPRISE = "enterprise", "Enterprise"
@@ -27,9 +28,12 @@ class TenantRole(models.TextChoices):
     Define los roles disponibles dentro de un tenant.
 
     Attributes:
+        OWNER: Dueño del tenant (creador, permisos máximos).
         ADMIN: Administrador con permisos completos del tenant.
         MEMBER: Miembro con permisos limitados.
     """
+
+    OWNER = "owner", "Dueño"
     ADMIN = "admin", "Administrador"
     MEMBER = "member", "Miembro"
 
@@ -44,6 +48,7 @@ class AIProvider(models.TextChoices):
         GEMINI: Google Gemini.
         LLAMA: Meta Llama (local o API).
     """
+
     PLATFORM_DEFAULT = "platform_default", "Default de la Plataforma"
     OPENAI = "openai", "OpenAI"
     CLAUDE = "claude", "Anthropic Claude"

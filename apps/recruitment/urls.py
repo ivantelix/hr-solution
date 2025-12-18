@@ -1,17 +1,17 @@
 """URLs de la app recruitment."""
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from apps.recruitment.views import (
-    JobVacancyViewSet,
     ApplicationViewSet,
+    JobVacancyViewSet,
 )
 
 router = DefaultRouter()
-router.register(r'vacancies', JobVacancyViewSet, basename='vacancy')
-router.register(r'applications', ApplicationViewSet, basename='application')
+router.register(r"vacancies", JobVacancyViewSet, basename="vacancy")
+router.register(r"applications", ApplicationViewSet, basename="application")
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

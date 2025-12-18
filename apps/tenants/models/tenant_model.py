@@ -6,9 +6,9 @@ a un cliente/empresa en el sistema SaaS multitenant.
 """
 
 import uuid
-from django.db import models
-from django.conf import settings
 
+from django.conf import settings
+from django.db import models
 
 from .choices import PlanType
 
@@ -38,53 +38,50 @@ class Tenant(models.Model):
     """
 
     id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-        verbose_name="ID"
+        primary_key=True, default=uuid.uuid4, editable=False, verbose_name="ID"
     )
 
     name = models.CharField(
         max_length=255,
         verbose_name="Nombre de la Empresa",
-        help_text="Nombre legal o comercial de la empresa"
+        help_text="Nombre legal o comercial de la empresa",
     )
 
     slug = models.SlugField(
         max_length=255,
         unique=True,
         verbose_name="Slug",
-        help_text="Identificador único para URLs (ej: empresa-abc)"
+        help_text="Identificador único para URLs (ej: empresa-abc)",
     )
+
+    # Branding preference
+    logo = models.ImageField(upload_to="tenant_logos/", null=True, blank=True)
+    primary_color = models.CharField(max_length=7, default="#000000")
 
     plan = models.CharField(
         max_length=20,
         choices=PlanType.choices,
         default=PlanType.BASIC,
         verbose_name="Plan Actual",
-        help_text="Plan de suscripción del tenant"
+        help_text="Plan de suscripción del tenant",
     )
 
     is_active = models.BooleanField(
-        default=True,
-        verbose_name="Activo",
-        help_text="Indica si el tenant está activo"
+        default=True, verbose_name="Activo", help_text="Indica si el tenant está activo"
     )
 
     max_users = models.PositiveIntegerField(
         default=5,
         verbose_name="Máximo de Usuarios",
-        help_text="Número máximo de usuarios permitidos"
+        help_text="Número máximo de usuarios permitidos",
     )
 
     created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Fecha de Creación"
+        auto_now_add=True, verbose_name="Fecha de Creación"
     )
 
     updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Fecha de Actualización"
+        auto_now=True, verbose_name="Fecha de Actualización"
     )
 
     # Relaciona a los usuarios (miembros) con este tenant
@@ -93,7 +90,7 @@ class Tenant(models.Model):
         through="TenantMembership",
         through_fields=("tenant", "user"),
         related_name="tenants",
-        verbose_name="Miembros"
+        verbose_name="Miembros",
     )
 
     class Meta:
@@ -121,9 +118,7 @@ class Tenant(models.Model):
         Returns:
             int: Cantidad de miembros activos.
         """
-        return self.tenantmembership_set.filter(
-            is_active=True
-        ).count()
+        return self.tenantmembership_set.filter(is_active=True).count()
 
     def can_add_member(self) -> bool:
         """
@@ -142,9 +137,9 @@ class Tenant(models.Model):
             QuerySet: QuerySet de usuarios con rol de administrador.
         """
         from .choices import TenantRole
+
         return self.members.filter(
-            tenantmembership__role=TenantRole.ADMIN,
-            tenantmembership__is_active=True
+            tenantmembership__role=TenantRole.ADMIN, tenantmembership__is_active=True
         )
 
     def deactivate(self) -> None:

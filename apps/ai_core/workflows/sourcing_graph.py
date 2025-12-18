@@ -1,12 +1,14 @@
-from typing import TypedDict, List
-from langgraph.graph import StateGraph, END
+from typing import TypedDict
+
+from langgraph.graph import END, StateGraph
+
 # from langchain_core.messages import SystemMessage, HumanMessage
 # from ..tools.registry import ToolRegistry
 
 
 # Schema del Estado
 class AgentState(TypedDict):
-    messages: List[str] # Simplificado para el ejemplo
+    messages: list[str]  # Simplificado para el ejemplo
     vacancy_id: int
     context: dict
     final_output: dict
@@ -20,19 +22,15 @@ class SourcingWorkflowBuilder:
         # Configuración: Qué herramientas puede usar cada agente
         # Esto evita que el analista intente buscar en linkedin
         agent_configs = {
-            "analyst": [], 
+            "analyst": [],
             "sourcer": ["linkedin_search_tool"],
         }
 
         workflow = StateGraph(AgentState)
 
         # Nodos
-        workflow.add_node(
-            "analyst", self._create_node("analyst", agent_configs)
-        )
-        workflow.add_node(
-            "sourcer", self._create_node("sourcer", agent_configs)
-        )
+        workflow.add_node("analyst", self._create_node("analyst", agent_configs))
+        workflow.add_node("sourcer", self._create_node("sourcer", agent_configs))
 
         # Edges
         workflow.set_entry_point("analyst")

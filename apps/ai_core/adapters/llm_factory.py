@@ -1,8 +1,9 @@
 from django.conf import settings
-from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
 from ..models.ai_config import TenantAIConfig
+from langchain_openai import ChatOpenAI
+
 from apps.tenants.models.choices import AIProvider
 
 
@@ -29,10 +30,7 @@ def get_llm_for_tenant(tenant_config: TenantAIConfig):
     # 2. Claude
     elif provider == AIProvider.CLAUDE:
         final_key = api_key or settings.CLAUDE_API_KEY_GLOBAL
-        return ChatAnthropic(
-            api_key=final_key,
-            model=model_name, temperature=0
-        )
+        return ChatAnthropic(api_key=final_key, model=model_name, temperature=0)
 
     # 3. Gemini
     elif provider == AIProvider.GEMINI:

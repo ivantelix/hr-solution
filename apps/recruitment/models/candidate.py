@@ -5,6 +5,7 @@ Este módulo contiene el modelo de candidato.
 """
 
 from django.db import models
+
 from apps.tenants.models import Tenant
 
 
@@ -32,55 +33,36 @@ class Candidate(models.Model):
         Tenant,
         on_delete=models.CASCADE,
         related_name="candidates",
-        verbose_name="Tenant"
+        verbose_name="Tenant",
     )
 
-    first_name = models.CharField(
-        max_length=100,
-        verbose_name="Nombre"
-    )
+    first_name = models.CharField(max_length=100, verbose_name="Nombre")
 
-    last_name = models.CharField(
-        max_length=100,
-        verbose_name="Apellido"
-    )
+    last_name = models.CharField(max_length=100, verbose_name="Apellido")
 
-    email = models.EmailField(
-        verbose_name="Email"
-    )
+    email = models.EmailField(verbose_name="Email")
 
-    phone = models.CharField(
-        max_length=20,
-        blank=True,
-        verbose_name="Teléfono"
-    )
+    phone = models.CharField(max_length=20, blank=True, verbose_name="Teléfono")
 
-    linkedin_url = models.URLField(
-        blank=True,
-        verbose_name="LinkedIn URL"
-    )
+    linkedin_url = models.URLField(blank=True, verbose_name="LinkedIn URL")
 
     resume_url = models.URLField(
-        blank=True,
-        verbose_name="CV URL",
-        help_text="URL del archivo del CV"
+        blank=True, verbose_name="CV URL", help_text="URL del archivo del CV"
     )
 
     skills = models.JSONField(
         default=list,
         blank=True,
         verbose_name="Habilidades",
-        help_text="Lista de habilidades extraídas o manuales"
+        help_text="Lista de habilidades extraídas o manuales",
     )
 
     created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Fecha de Creación"
+        auto_now_add=True, verbose_name="Fecha de Creación"
     )
 
     updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Fecha de Actualización"
+        auto_now=True, verbose_name="Fecha de Actualización"
     )
 
     class Meta:

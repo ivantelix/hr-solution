@@ -5,6 +5,7 @@ Este módulo implementa el patrón Repository para Candidate.
 """
 
 from typing import Protocol
+
 from django.db.models import QuerySet
 
 from apps.recruitment.models import Candidate
@@ -13,21 +14,13 @@ from apps.recruitment.models import Candidate
 class CandidateRepositoryProtocol(Protocol):
     """Interface para el repositorio de candidatos."""
 
-    def get_by_id(self, candidate_id: int) -> Candidate | None:
-        ...
+    def get_by_id(self, candidate_id: int) -> Candidate | None: ...
 
-    def get_by_email(
-        self,
-        tenant_id: str,
-        email: str
-    ) -> Candidate | None:
-        ...
+    def get_by_email(self, tenant_id: str, email: str) -> Candidate | None: ...
 
-    def get_by_tenant(self, tenant_id: str) -> QuerySet[Candidate]:
-        ...
+    def get_by_tenant(self, tenant_id: str) -> QuerySet[Candidate]: ...
 
-    def create(self, **kwargs) -> Candidate:
-        ...
+    def create(self, **kwargs) -> Candidate: ...
 
 
 class CandidateRepository:
@@ -39,16 +32,9 @@ class CandidateRepository:
         except Candidate.DoesNotExist:
             return None
 
-    def get_by_email(
-        self,
-        tenant_id: str,
-        email: str
-    ) -> Candidate | None:
+    def get_by_email(self, tenant_id: str, email: str) -> Candidate | None:
         try:
-            return Candidate.objects.get(
-                tenant_id=tenant_id,
-                email=email
-            )
+            return Candidate.objects.get(tenant_id=tenant_id, email=email)
         except Candidate.DoesNotExist:
             return None
 

@@ -6,6 +6,7 @@ excluyendo campos sensibles como username y password.
 """
 
 from rest_framework import serializers
+
 from apps.users.models import User
 
 
@@ -20,10 +21,10 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'first_name',
-            'last_name',
-            'phone',
-            'avatar',
+            "first_name",
+            "last_name",
+            "phone",
+            "avatar",
         ]
 
     def validate_phone(self, value: str | None) -> str | None:
@@ -43,7 +44,6 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         """
         if value and len(value) < 7:
             raise serializers.ValidationError(
-                "El número de teléfono debe tener al menos "
-                "7 caracteres."
+                "El número de teléfono debe tener al menos 7 caracteres."
             )
         return value

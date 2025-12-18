@@ -1,0 +1,41 @@
+{
+  "include": [
+    "apps",
+    "core"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/migrations",
+    ".venv",
+    "venv",
+    "staticfiles",
+    "media"
+  ],
+  "ignore": [
+    "**/migrations"
+  ],
+  "defineConstant": {
+    "DEBUG": true
+  },
+  "stubPath": "typings",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Linux",
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "pythonVersion": "3.12",
+      "pythonPlatform": "Linux",
+      "extraPaths": [
+        ".",
+        "./apps"
+      ]
+    }
+  ],
+  "typeCheckingMode": "basic",
+  "useLibraryCodeForTypes": true,
+  "autoSearchPaths": true,
+  "autoImportCompletions": true
+}

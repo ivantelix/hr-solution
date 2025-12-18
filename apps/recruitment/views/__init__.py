@@ -1,9 +1,9 @@
 """Views de la app recruitment."""
 
-from .job_vacancy_views import JobVacancyViewSet
 from .application_views import ApplicationViewSet
+from .job_vacancy_views import JobVacancyViewSet
 
 __all__ = [
-    "JobVacancyViewSet",
     "ApplicationViewSet",
+    "JobVacancyViewSet",
 ]

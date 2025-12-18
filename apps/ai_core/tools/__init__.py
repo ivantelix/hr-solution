@@ -5,12 +5,13 @@ Este módulo importa automáticamente todas las tools para que se
 registren en el ToolRegistry al importar el paquete.
 """
 
-from .registry import ToolRegistry
-
 # Importar todos los módulos de tools para que se auto-registren
-from . import linkedin_tools  # noqa: F401
-from . import candidate_tools  # noqa: F401
-from . import email_tools  # noqa: F401
+from . import (
+    candidate_tools,
+    email_tools,
+    linkedin_tools,
+)
+from .registry import ToolRegistry
 
 __all__ = [
     "ToolRegistry",

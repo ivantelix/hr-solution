@@ -6,6 +6,7 @@ de lectura (GET) del modelo User.
 """
 
 from rest_framework import serializers
+
 from apps.users.models import User
 
 
@@ -23,27 +24,27 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id',
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'full_name',
-            'phone',
-            'avatar',
-            'is_email_verified',
-            'is_active',
-            'is_staff',
-            'date_joined',
-            'last_login',
-            'active_tenants_count',
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "full_name",
+            "phone",
+            "avatar",
+            "is_email_verified",
+            "is_active",
+            "is_staff",
+            "date_joined",
+            "last_login",
+            "active_tenants_count",
         ]
         read_only_fields = [
-            'id',
-            'is_active',
-            'is_staff',
-            'date_joined',
-            'last_login',
+            "id",
+            "is_active",
+            "is_staff",
+            "date_joined",
+            "last_login",
         ]
 
     def get_full_name(self, obj: User) -> str:

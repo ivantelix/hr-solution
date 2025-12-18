@@ -1,4 +1,5 @@
 from django.db import models
+
 from apps.tenants.models import Tenant
 
 
@@ -6,6 +7,7 @@ class AgentExecutionLog(models.Model):
     """
     Bitácora de cada paso que da un agente.
     """
+
     STATUS_RUNNING = "running"
     STATUS_SUCCESS = "success"
     STATUS_FAILED = "failed"
@@ -39,9 +41,7 @@ class AgentExecutionLog(models.Model):
     cost_usd = models.DecimalField(max_digits=10, decimal_places=6, default=0)
 
     status = models.CharField(
-        max_length=20,
-        default=STATUS_RUNNING,
-        choices=STATUS_CHOICES
+        max_length=20, default=STATUS_RUNNING, choices=STATUS_CHOICES
     )
 
     def __str__(self):

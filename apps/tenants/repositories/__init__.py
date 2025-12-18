@@ -1,17 +1,17 @@
 """Repositorios de la app tenants."""
 
-from .tenant_repository import (
-    TenantRepository,
-    TenantRepositoryProtocol,
-)
 from .tenant_membership_repository import (
     TenantMembershipRepository,
     TenantMembershipRepositoryProtocol,
 )
+from .tenant_repository import (
+    TenantRepository,
+    TenantRepositoryProtocol,
+)
 
 __all__ = [
-    "TenantRepository",
-    "TenantRepositoryProtocol",
     "TenantMembershipRepository",
     "TenantMembershipRepositoryProtocol",
+    "TenantRepository",
+    "TenantRepositoryProtocol",
 ]

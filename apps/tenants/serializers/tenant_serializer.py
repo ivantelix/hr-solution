@@ -6,6 +6,7 @@ de lectura (GET) del modelo Tenant.
 """
 
 from rest_framework import serializers
+
 from apps.tenants.models import Tenant
 
 
@@ -19,30 +20,27 @@ class TenantSerializer(serializers.ModelSerializer):
 
     active_members_count = serializers.SerializerMethodField()
     can_add_members = serializers.SerializerMethodField()
-    plan_display = serializers.CharField(
-        source='get_plan_display',
-        read_only=True
-    )
+    plan_display = serializers.CharField(source="get_plan_display", read_only=True)
 
     class Meta:
         model = Tenant
         fields = [
-            'id',
-            'name',
-            'slug',
-            'plan',
-            'plan_display',
-            'is_active',
-            'max_users',
-            'active_members_count',
-            'can_add_members',
-            'created_at',
-            'updated_at',
+            "id",
+            "name",
+            "slug",
+            "plan",
+            "plan_display",
+            "is_active",
+            "max_users",
+            "active_members_count",
+            "can_add_members",
+            "created_at",
+            "updated_at",
         ]
         read_only_fields = [
-            'id',
-            'created_at',
-            'updated_at',
+            "id",
+            "created_at",
+            "updated_at",
         ]
 
     def get_active_members_count(self, obj: Tenant) -> int:

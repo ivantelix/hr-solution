@@ -6,6 +6,7 @@ de email de un usuario.
 """
 
 from rest_framework import serializers
+
 from apps.users.models import User
 
 
@@ -31,11 +32,7 @@ class UpdateEmailSerializer(serializers.Serializer):
         Raises:
             ValidationError: Si el email ya está en uso.
         """
-        user = self.context.get('request').user
-        if User.objects.filter(email=value).exclude(
-            id=user.id
-        ).exists():
-            raise serializers.ValidationError(
-                "Este email ya está en uso."
-            )
+        user = self.context.get("request").user
+        if User.objects.filter(email=value).exclude(id=user.id).exists():
+            raise serializers.ValidationError("Este email ya está en uso.")
         return value.lower()

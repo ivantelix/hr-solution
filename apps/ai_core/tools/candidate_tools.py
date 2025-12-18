@@ -5,17 +5,14 @@ Este módulo contiene tools para trabajar con datos de candidatos,
 análisis de CVs, matching con vacantes, etc.
 """
 
-from typing import Dict
 from langchain_core.tools import tool
+
 from .registry import ToolRegistry
 
 
 @ToolRegistry.register("analyze_candidate_fit")
 @tool
-def analyze_candidate_fit(
-    candidate_profile: Dict,
-    job_requirements: Dict
-) -> Dict:
+def analyze_candidate_fit(candidate_profile: dict, job_requirements: dict) -> dict:
     """
     Analiza qué tan bien un candidato encaja con una vacante.
 
@@ -33,21 +30,15 @@ def analyze_candidate_fit(
         ... )
         >>> print(result["match_score"])
     """
-    candidate_skills = set(
-        skill.lower()
-        for skill in candidate_profile.get("skills", [])
-    )
-    required_skills = set(
-        skill.lower()
-        for skill in job_requirements.get("required_skills", [])
-    )
+    candidate_skills = {skill.lower() for skill in candidate_profile.get("skills", [])}
+    required_skills = {
+        skill.lower() for skill in job_requirements.get("required_skills", [])
+    }
 
     # Calcular matching de skills
     matching_skills = candidate_skills.intersection(required_skills)
     match_percentage = (
-        len(matching_skills) / len(required_skills) * 100
-        if required_skills
-        else 0
+        len(matching_skills) / len(required_skills) * 100 if required_skills else 0
     )
 
     # Analizar experiencia
@@ -75,7 +66,7 @@ def analyze_candidate_fit(
 
 @ToolRegistry.register("extract_cv_information")
 @tool
-def extract_cv_information(cv_text: str) -> Dict:
+def extract_cv_information(cv_text: str) -> dict:
     """
     Extrae información estructurada de un CV en texto plano.
 
@@ -117,7 +108,7 @@ def extract_cv_information(cv_text: str) -> Dict:
 
 @ToolRegistry.register("generate_candidate_summary")
 @tool
-def generate_candidate_summary(candidate_data: Dict) -> str:
+def generate_candidate_summary(candidate_data: dict) -> str:
     """
     Genera un resumen ejecutivo de un candidato.
 
@@ -142,11 +133,11 @@ def generate_candidate_summary(candidate_data: Dict) -> str:
 Experiencia: {years} años
 
 Habilidades principales:
-{', '.join(skills[:5]) if skills else 'No especificadas'}
+{", ".join(skills[:5]) if skills else "No especificadas"}
 
-Ubicación: {candidate_data.get('location', 'No especificada')}
+Ubicación: {candidate_data.get("location", "No especificada")}
 
-Perfil: {candidate_data.get('summary', 'No disponible')}
+Perfil: {candidate_data.get("summary", "No disponible")}
     """.strip()
 
     return summary

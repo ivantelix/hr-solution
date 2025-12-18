@@ -4,11 +4,12 @@ Modelo JobVacancy.
 Este módulo contiene el modelo de vacante de empleo.
 """
 
-from django.db import models
 from django.conf import settings
+from django.db import models
 from django.utils import timezone
 
 from apps.tenants.models import Tenant
+
 from .choices import JobStatus
 
 
@@ -49,42 +50,33 @@ class JobVacancy(models.Model):
         Tenant,
         on_delete=models.CASCADE,
         related_name="vacancies",
-        verbose_name="Tenant"
+        verbose_name="Tenant",
     )
 
-    title = models.CharField(
-        max_length=255,
-        verbose_name="Título del Puesto"
-    )
+    title = models.CharField(max_length=255, verbose_name="Título del Puesto")
 
-    description = models.TextField(
-        verbose_name="Descripción"
-    )
+    description = models.TextField(verbose_name="Descripción")
 
     requirements = models.TextField(
         verbose_name="Requisitos",
-        help_text="Lista de requisitos técnicos y habilidades blandas"
+        help_text="Lista de requisitos técnicos y habilidades blandas",
     )
 
     status = models.CharField(
         max_length=20,
         choices=JobStatus.choices,
         default=JobStatus.DRAFT,
-        verbose_name="Estado"
+        verbose_name="Estado",
     )
 
-    location = models.CharField(
-        max_length=100,
-        blank=True,
-        verbose_name="Ubicación"
-    )
+    location = models.CharField(max_length=100, blank=True, verbose_name="Ubicación")
 
     salary_min = models.DecimalField(
         max_digits=12,
         decimal_places=2,
         null=True,
         blank=True,
-        verbose_name="Salario Mínimo"
+        verbose_name="Salario Mínimo",
     )
 
     salary_max = models.DecimalField(
@@ -92,42 +84,31 @@ class JobVacancy(models.Model):
         decimal_places=2,
         null=True,
         blank=True,
-        verbose_name="Salario Máximo"
+        verbose_name="Salario Máximo",
     )
 
-    currency = models.CharField(
-        max_length=3,
-        default="USD",
-        verbose_name="Moneda"
-    )
+    currency = models.CharField(max_length=3, default="USD", verbose_name="Moneda")
 
-    is_remote = models.BooleanField(
-        default=False,
-        verbose_name="Remoto"
-    )
+    is_remote = models.BooleanField(default=False, verbose_name="Remoto")
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name="created_vacancies",
-        verbose_name="Creado Por"
+        verbose_name="Creado Por",
     )
 
     created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Fecha de Creación"
+        auto_now_add=True, verbose_name="Fecha de Creación"
     )
 
     updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Fecha de Actualización"
+        auto_now=True, verbose_name="Fecha de Actualización"
     )
 
     closed_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name="Fecha de Cierre"
+        null=True, blank=True, verbose_name="Fecha de Cierre"
     )
 
     manual_interview_guide = models.TextField(blank=True, null=True)

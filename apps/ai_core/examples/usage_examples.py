@@ -6,7 +6,6 @@ en un caso de uso real: sourcing de candidatos.
 """
 
 from apps.ai_core.tools import ToolRegistry
-from apps.ai_core.services.workflow_service import start_sourcing_workflow
 
 
 def ejemplo_1_usar_tool_individual():
@@ -19,18 +18,20 @@ def ejemplo_1_usar_tool_individual():
     search_tool = ToolRegistry.get_tool("linkedin_search_tool")
 
     # Invocar la tool
-    result = search_tool.invoke({
-        "query": "Python Developer Senior",
-        "location": "Caracas, Venezuela",
-        "max_results": 5
-    })
+    result = search_tool.invoke(
+        {
+            "query": "Python Developer Senior",
+            "location": "Caracas, Venezuela",
+            "max_results": 5,
+        }
+    )
 
     # Mostrar resultados
     print(f"\nBúsqueda: {result['query']}")
     print(f"Ubicación: {result['location']}")
     print(f"Candidatos encontrados: {result['total_results']}\n")
 
-    for i, profile in enumerate(result['profiles'], 1):
+    for i, profile in enumerate(result["profiles"], 1):
         print(f"{i}. {profile['name']}")
         print(f"   Título: {profile['title']}")
         print(f"   LinkedIn: {profile['linkedin_url']}")
@@ -50,38 +51,39 @@ def ejemplo_2_analizar_candidato():
     # Datos del candidato
     candidate = {
         "skills": ["Python", "Django", "PostgreSQL", "Docker", "AWS"],
-        "experience_years": 6
+        "experience_years": 6,
     }
 
     # Requisitos de la vacante
     job_requirements = {
         "required_skills": ["Python", "Django", "FastAPI", "PostgreSQL"],
-        "min_experience_years": 4
+        "min_experience_years": 4,
     }
 
     # Analizar
-    result = analyze_tool.invoke({
-        "candidate_profile": candidate,
-        "job_requirements": job_requirements
-    })
+    result = analyze_tool.invoke(
+        {"candidate_profile": candidate, "job_requirements": job_requirements}
+    )
 
     # Mostrar resultados
     print(f"\nMatch Score: {result['match_score']}%")
     print(f"Recomendación: {result['recommendation']}")
-    print(f"\nSkills que coinciden:")
-    for skill in result['matching_skills']:
+    print("\nSkills que coinciden:")
+    for skill in result["matching_skills"]:
         print(f"  ✓ {skill}")
 
-    print(f"\nSkills faltantes:")
-    for skill in result['missing_skills']:
+    print("\nSkills faltantes:")
+    for skill in result["missing_skills"]:
         print(f"  ✗ {skill}")
 
-    print(f"\nSkills adicionales del candidato:")
-    for skill in result['extra_skills']:
+    print("\nSkills adicionales del candidato:")
+    for skill in result["extra_skills"]:
         print(f"  + {skill}")
 
-    print(f"\nExperiencia: {result['candidate_years']} años "
-          f"(requerido: {result['required_years']})")
+    print(
+        f"\nExperiencia: {result['candidate_years']} años "
+        f"(requerido: {result['required_years']})"
+    )
     print(f"Cumple experiencia: {'Sí' if result['experience_match'] else 'No'}")
 
 
@@ -92,24 +94,24 @@ def ejemplo_3_generar_email():
     print("=" * 60)
 
     # Obtener la tool de generación de email
-    email_tool = ToolRegistry.get_tool(
-        "generate_interview_invitation_email"
-    )
+    email_tool = ToolRegistry.get_tool("generate_interview_invitation_email")
 
     # Generar email
-    email = email_tool.invoke({
-        "candidate_name": "Juan Pérez",
-        "position": "Senior Python Developer",
-        "interview_date": "2025-12-05",
-        "interview_time": "10:00 AM",
-        "company_name": "Tech Solutions Corp"
-    })
+    email = email_tool.invoke(
+        {
+            "candidate_name": "Juan Pérez",
+            "position": "Senior Python Developer",
+            "interview_date": "2025-12-05",
+            "interview_time": "10:00 AM",
+            "company_name": "Tech Solutions Corp",
+        }
+    )
 
     # Mostrar email
     print(f"\nAsunto: {email['subject']}")
     print("\nCuerpo:")
     print("-" * 60)
-    print(email['body'])
+    print(email["body"])
     print("-" * 60)
 
 
@@ -126,16 +128,9 @@ def ejemplo_4_workflow_completo():
         Buscamos un desarrollador Python senior con experiencia
         en Django y FastAPI para liderar proyectos de backend.
         """,
-        "requirements": [
-            "Python",
-            "Django",
-            "FastAPI",
-            "PostgreSQL",
-            "Docker",
-            "AWS"
-        ],
+        "requirements": ["Python", "Django", "FastAPI", "PostgreSQL", "Docker", "AWS"],
         "location": "Caracas, Venezuela (Remoto)",
-        "experience_years": 5
+        "experience_years": 5,
     }
 
     print("\nVacante:")
@@ -171,12 +166,7 @@ def ejemplo_5_listar_tools_disponibles():
     print(f"\nTotal de tools registradas: {len(tools)}\n")
 
     # Agrupar por categoría
-    categories = {
-        "LinkedIn": [],
-        "Candidatos": [],
-        "Email": [],
-        "Otras": []
-    }
+    categories = {"LinkedIn": [], "Candidatos": [], "Email": [], "Otras": []}
 
     for tool_name in tools:
         if "linkedin" in tool_name:
@@ -219,6 +209,7 @@ def main():
     except Exception as e:
         print(f"\n❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
 
 

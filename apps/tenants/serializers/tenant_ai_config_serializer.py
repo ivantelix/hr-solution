@@ -6,6 +6,7 @@ de los tenants (BYOK).
 """
 
 from rest_framework import serializers
+
 from apps.tenants.models import TenantAIConfig
 
 
@@ -18,31 +19,30 @@ class TenantAIConfigSerializer(serializers.ModelSerializer):
     """
 
     provider_display = serializers.CharField(
-        source='get_provider_display',
-        read_only=True
+        source="get_provider_display", read_only=True
     )
     api_key_safe = serializers.SerializerMethodField()
 
     class Meta:
         model = TenantAIConfig
         fields = [
-            'id',
-            'tenant',
-            'provider',
-            'provider_display',
-            'api_key_safe',
-            'model_name',
-            'temperature',
-            'max_tokens',
-            'is_active',
-            'created_at',
-            'updated_at',
+            "id",
+            "tenant",
+            "provider",
+            "provider_display",
+            "api_key_safe",
+            "model_name",
+            "temperature",
+            "max_tokens",
+            "is_active",
+            "created_at",
+            "updated_at",
         ]
         read_only_fields = [
-            'id',
-            'tenant',
-            'created_at',
-            'updated_at',
+            "id",
+            "tenant",
+            "created_at",
+            "updated_at",
         ]
 
     def get_api_key_safe(self, obj: TenantAIConfig) -> str:
@@ -69,11 +69,11 @@ class TenantAIConfigCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = TenantAIConfig
         fields = [
-            'provider',
-            'api_key',
-            'model_name',
-            'temperature',
-            'max_tokens',
+            "provider",
+            "api_key",
+            "model_name",
+            "temperature",
+            "max_tokens",
         ]
 
     def validate_api_key(self, value: str) -> str:
@@ -90,9 +90,7 @@ class TenantAIConfigCreateSerializer(serializers.ModelSerializer):
             ValidationError: Si la API Key está vacía.
         """
         if not value or len(value.strip()) == 0:
-            raise serializers.ValidationError(
-                "La API Key no puede estar vacía."
-            )
+            raise serializers.ValidationError("La API Key no puede estar vacía.")
         return value.strip()
 
     def validate_temperature(self, value: float) -> float:

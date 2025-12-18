@@ -6,9 +6,10 @@ a datos del modelo Tenant.
 """
 
 from typing import Protocol
+
 from django.db.models import QuerySet
 
-from apps.tenants.models import Tenant, PlanType
+from apps.tenants.models import PlanType, Tenant
 
 
 class TenantRepositoryProtocol(Protocol):
@@ -94,8 +95,7 @@ class TenantRepository:
         """
         return list(
             Tenant.objects.filter(
-                tenantmembership__user_id=user_id,
-                tenantmembership__is_active=True
+                tenantmembership__user_id=user_id, tenantmembership__is_active=True
             ).distinct()
         )
 
@@ -113,7 +113,7 @@ class TenantRepository:
             Tenant.objects.filter(
                 tenantmembership__user_id=user_id,
                 tenantmembership__is_active=True,
-                is_active=True
+                is_active=True,
             ).distinct()
         )
 

@@ -5,7 +5,6 @@ Este módulo contiene los casos de uso relacionados con postulaciones
 y gestión de candidatos.
 """
 
-
 from django.db import transaction
 
 from apps.recruitment.models import (
@@ -33,27 +32,16 @@ class ApplicationService:
         application_repo: ApplicationRepository | None = None,
         candidate_repo: CandidateRepository | None = None,
         vacancy_repo: JobVacancyRepository | None = None,
-        tenant_repo: TenantRepository | None = None
+        tenant_repo: TenantRepository | None = None,
     ):
-        self.application_repo = (
-            application_repo or ApplicationRepository()
-        )
-        self.candidate_repo = (
-            candidate_repo or CandidateRepository()
-        )
-        self.vacancy_repo = (
-            vacancy_repo or JobVacancyRepository()
-        )
-        self.tenant_repo = (
-            tenant_repo or TenantRepository()
-        )
+        self.application_repo = application_repo or ApplicationRepository()
+        self.candidate_repo = candidate_repo or CandidateRepository()
+        self.vacancy_repo = vacancy_repo or JobVacancyRepository()
+        self.tenant_repo = tenant_repo or TenantRepository()
 
     @transaction.atomic
     def apply_to_vacancy(
-        self,
-        vacancy_id: int,
-        candidate_data: dict,
-        source: str = "website"
+        self, vacancy_id: int, candidate_data: dict, source: str = "website"
     ) -> Application:
         """
         Registra una postulación (crea candidato si no existe).
@@ -74,14 +62,13 @@ class ApplicationService:
             raise ValueError("La vacante no existe.")
 
         tenant_id = str(vacancy.tenant.id)
-        email = candidate_data.get('email')
+        email = candidate_data.get("email")
 
         # Buscar o crear candidato
         candidate = self.candidate_repo.get_by_email(tenant_id, email)
         if not candidate:
             candidate = self.candidate_repo.create(
-                tenant=vacancy.tenant,
-                **candidate_data
+                tenant=vacancy.tenant, **candidate_data
             )
         else:
             # Actualizar datos si es necesario
@@ -89,8 +76,7 @@ class ApplicationService:
 
         # Verificar si ya postuló
         existing_app = self.application_repo.get_by_candidate_and_vacancy(
-            candidate.id,
-            vacancy.id
+            candidate.id, vacancy.id
         )
         if existing_app:
             raise ValueError("El candidato ya postuló a esta vacante.")
@@ -101,17 +87,14 @@ class ApplicationService:
             vacancy=vacancy,
             candidate=candidate,
             source=source,
-            status=CandidateStatus.NEW
+            status=CandidateStatus.NEW,
         )
 
         return application
 
     @transaction.atomic
     def update_status(
-        self,
-        application_id: int,
-        new_status: CandidateStatus,
-        notes: str | None = None
+        self, application_id: int, new_status: CandidateStatus, notes: str | None = None
     ) -> Application | None:
         """
         Actualiza el estado de una postulación.
@@ -136,13 +119,10 @@ class ApplicationService:
             current_notes = application.notes or ""
             new_note_entry = f"\n[{new_status}]: {notes}"
             application.notes = current_notes + new_note_entry
-            application.save(update_fields=['notes'])
+            application.save(update_fields=["notes"])
 
         return application
 
-    def get_vacancy_applications(
-        self,
-        vacancy_id: int
-    ) -> list[Application]:
+    def get_vacancy_applications(self, vacancy_id: int) -> list[Application]:
         """Obtiene postulaciones de una vacante."""
         return list(self.application_repo.get_by_vacancy(vacancy_id))

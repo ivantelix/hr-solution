@@ -5,9 +5,8 @@ Este módulo contiene el modelo intermedio que conecta usuarios
 con tenants y define sus roles.
 """
 
-from django.db import models
 from django.conf import settings
-from django.utils import timezone
+from django.db import models
 
 from .choices import TenantRole
 from .tenant_model import Tenant
@@ -33,16 +32,10 @@ class TenantMembership(models.Model):
         diferentes roles.
     """
 
-    tenant = models.ForeignKey(
-        Tenant,
-        on_delete=models.CASCADE,
-        verbose_name="Tenant"
-    )
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, verbose_name="Tenant")
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        verbose_name="Usuario"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Usuario"
     )
 
     role = models.CharField(
@@ -50,19 +43,16 @@ class TenantMembership(models.Model):
         choices=TenantRole.choices,
         default=TenantRole.MEMBER,
         verbose_name="Rol",
-        help_text="Rol del usuario dentro del tenant"
+        help_text="Rol del usuario dentro del tenant",
     )
 
     is_active = models.BooleanField(
         default=True,
         verbose_name="Activo",
-        help_text="Indica si la membresía está activa"
+        help_text="Indica si la membresía está activa",
     )
 
-    joined_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Fecha de Ingreso"
-    )
+    joined_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Ingreso")
 
     invited_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -71,13 +61,13 @@ class TenantMembership(models.Model):
         blank=True,
         related_name="invited_members",
         verbose_name="Invitado Por",
-        help_text="Usuario que invitó a este miembro"
+        help_text="Usuario que invitó a este miembro",
     )
 
     class Meta:
         verbose_name = "Membresía de Tenant"
         verbose_name_plural = "Membresías de Tenant"
-        unique_together = ('tenant', 'user')
+        unique_together = ("tenant", "user")
         ordering = ["-joined_at"]
         indexes = [
             models.Index(fields=["tenant", "is_active"]),
@@ -91,10 +81,7 @@ class TenantMembership(models.Model):
         Returns:
             str: Descripción de la membresía.
         """
-        return (
-            f"{self.user.username} en {self.tenant.name} "
-            f"({self.get_role_display()})"
-        )
+        return f"{self.user.username} en {self.tenant.name} ({self.get_role_display()})"
 
     def is_admin(self) -> bool:
         """

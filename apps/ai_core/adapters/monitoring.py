@@ -1,13 +1,12 @@
 # import os
 from django.conf import settings
 from langchain_core.callbacks import StdOutCallbackHandler
+
 # from langfuse.callback import CallbackHandler as LangfuseCallbackHandler
 
 
 def get_workflow_monitor(
-    trace_name: str,
-    tenant_id: str,
-    session_id: str = None
+    trace_name: str, tenant_id: str, session_id: str | None = None
 ) -> list:
     """
     Devuelve una lista de Callbacks para monitorear la ejecución.
