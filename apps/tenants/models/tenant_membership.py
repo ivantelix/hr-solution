@@ -32,10 +32,14 @@ class TenantMembership(models.Model):
         diferentes roles.
     """
 
-    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, verbose_name="Tenant")
+    tenant = models.ForeignKey(
+        Tenant, on_delete=models.CASCADE, verbose_name="Tenant"
+    )
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Usuario"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name="Usuario",
     )
 
     role = models.CharField(
@@ -52,7 +56,16 @@ class TenantMembership(models.Model):
         help_text="Indica si la membresía está activa",
     )
 
-    joined_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Ingreso")
+    joined_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Fecha de Ingreso"
+    )
+
+    permissions = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name="Permisos Adicionales",
+        help_text="Lista de permisos específicos otorgados a este miembro.",
+    )
 
     invited_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -81,7 +94,10 @@ class TenantMembership(models.Model):
         Returns:
             str: Descripción de la membresía.
         """
-        return f"{self.user.username} en {self.tenant.name} ({self.get_role_display()})"
+        return (
+            f"{self.user.username} en {self.tenant.name} "
+            f"({self.get_role_display()})"
+        )
 
     def is_admin(self) -> bool:
         """
