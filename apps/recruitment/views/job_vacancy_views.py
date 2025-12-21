@@ -47,7 +47,37 @@ class JobVacancyViewSet(viewsets.ModelViewSet):
                 **serializer.validated_data,
             )
             return Response(
-                JobVacancySerializer(vacancy).data, status=status.HTTP_201_CREATED
+                JobVacancySerializer(vacancy).data,
+                status=status.HTTP_201_CREATED,
+            )
+        except ValueError as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+    @action(detail=True, methods=["post"])
+    def preview_posts(self, request, pk=None):
+        """Genera previsualizaciones de posts sociales."""
+        platforms = request.data.get("platforms", [])
+        if not platforms:
+            return Response(
+                {"error": "Se requiere lista de plataformas"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            posts = self.service.generate_social_previews(pk, platforms)
+            # Necesitamos importar VacancySocialPostSerializer aquí o arriba
+            # Para evitar ciclos, usaremos JobVacancySerializer para
+            # devolver la vacante completa. O mejor, serializar solo los posts.
+            # Importar aquí para evitar ciclo circular.
+            from apps.recruitment.serializers import (
+                VacancySocialPostSerializer,
+            )
+
+            return Response(
+                VacancySocialPostSerializer(posts, many=True).data,
+                status=status.HTTP_201_CREATED,
             )
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

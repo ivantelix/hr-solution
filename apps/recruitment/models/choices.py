@@ -37,3 +37,20 @@ class ApplicationSource(models.TextChoices):
     REFERRAL = "referral", "Referido"
     AGENCY = "agency", "Agencia"
     OTHER = "other", "Otro"
+
+
+class SocialPlatform(models.TextChoices):
+    """Plataforma de red social."""
+
+    LINKEDIN = "linkedin", "LinkedIn"
+    TWITTER = "twitter", "Twitter"
+    FACEBOOK = "facebook", "Facebook"
+
+
+class SocialPostStatus(models.TextChoices):
+    """Estado de la publicación en red social."""
+
+    DRAFT = "draft", "Borrador"
+    SCHEDULED = "scheduled", "Programada"
+    PUBLISHED = "published", "Publicada"
+    FAILED = "failed", "Fallida"

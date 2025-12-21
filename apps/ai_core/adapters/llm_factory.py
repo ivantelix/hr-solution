@@ -10,33 +10,38 @@ from apps.tenants.models.choices import AIProvider
 def get_llm_for_tenant(tenant_config: TenantAIConfig):
     """
     Devuelve una instancia de LangChain ChatModel configurada
-    según las preferencias del tenant.
+    según las preferencias del tenant o la plataforma.
     """
-    api_key = tenant_config.api_key
-    provider = tenant_config.provider
-    model_name = tenant_config.model_name
+    # 1. Determinar configuración (BYOK vs Plataforma)
+    api_key = None
+    provider = None
+    model_name = None
 
-    # Lógica de Fallback a las llaves globales de la plataforma
-    if provider == AIProvider.PLATFORM_DEFAULT:
-        # Aquí podrías definir tu lógica de default (ej. usar OpenAI)
-        provider = AIProvider.OPENAI
+    if tenant_config and tenant_config.api_key:
+        # BYOK: El cliente trae su propia llave
+        api_key = tenant_config.api_key
+        provider = tenant_config.provider
+        model_name = tenant_config.model_name
+    else:
+        # Plataforma: Usar llaves maestras
+        # TODO: Aquí podríamos validar cuotas antes de asignar
+        provider = AIProvider.OPENAI  # Default de plataforma
         api_key = settings.OPENAI_API_KEY_GLOBAL
+        model_name = "gemini-1.5-flash"  # Default de plataforma
+    
+    if not api_key:
+        raise ValueError("No se encontró una API Key válida (ni del tenant ni global).")
 
-    # 1. OpenAI
+    # 2. Instanciar Modelo
     if provider == AIProvider.OPENAI:
-        final_key = api_key or settings.OPENAI_API_KEY_GLOBAL
-        return ChatOpenAI(api_key=final_key, model=model_name, temperature=0)
+        return ChatOpenAI(api_key=api_key, model=model_name, temperature=0)
 
-    # 2. Claude
     elif provider == AIProvider.CLAUDE:
-        final_key = api_key or settings.CLAUDE_API_KEY_GLOBAL
-        return ChatAnthropic(api_key=final_key, model=model_name, temperature=0)
+        return ChatAnthropic(api_key=api_key, model=model_name, temperature=0)
 
-    # 3. Gemini
     elif provider == AIProvider.GEMINI:
-        final_key = api_key or settings.GEMINI_API_KEY_GLOBAL
         return ChatGoogleGenerativeAI(
-            google_api_key=final_key,
+            google_api_key=api_key,
             model=model_name,
             temperature=0
         )

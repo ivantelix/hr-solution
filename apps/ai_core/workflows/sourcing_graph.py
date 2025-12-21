@@ -1,6 +1,13 @@
 from typing import TypedDict
+import logging
 
 from langgraph.graph import END, StateGraph
+from langchain_core.messages import BaseMessage
+
+from ..services.usage_service import UsageService
+from ..models.logs import AgentExecutionLog
+
+logger = logging.getLogger(__name__)
 
 # from langchain_core.messages import SystemMessage, HumanMessage
 # from ..tools.registry import ToolRegistry
@@ -52,11 +59,54 @@ class SourcingWorkflowBuilder:
         #     llm_bound = self.llm.bind_tools(tools)
         # else:
         #     llm_bound = self.llm
+        
+        # Simulamos llm bound para el ejemplo actual
+        llm_bound = self.llm
 
         def node_func(state):
-            # Lógica simple de invocación
-            # prompt = f"Eres un {agent_name}... contexto: {state['context']}"
-            # response = self.llm.invoke(...)
-            return {"messages": [f"Agente {agent_name} ejecutado"]}
+            # Obtener tenant_id del contexto
+            context = state.get("context", {})
+            tenant_id = context.get("tenant_id")
+            
+            try:
+                # Prompt simple por ahora
+                messages = state.get("messages", [])
+                
+                # Invocación real al LLM
+                response = llm_bound.invoke(messages)
+                
+                # Obtener output y metadata reales
+                output_content = response.content
+                response_metadata = response.response_metadata
+                
+                # Registrar éxito
+                if tenant_id:
+                    UsageService.log_node_execution(
+                        tenant_id=tenant_id,
+                        workflow_name="sourcing_workflow",
+                        node_name=agent_name,
+                        input_data={"context": context},
+                        output_data={"content": output_content},
+                        metadata=response_metadata,
+                        status=AgentExecutionLog.STATUS_SUCCESS
+                    )
+
+                return {"messages": [output_content]}
+
+            except Exception as e:
+                logger.error(f"Error en nodo {agent_name}: {str(e)}")
+                # Registrar fallo
+                if tenant_id:
+                    UsageService.log_node_execution(
+                        tenant_id=tenant_id,
+                        workflow_name="sourcing_workflow",
+                        node_name=agent_name,
+                        input_data={"context": context},
+                        output_data=None,
+                        metadata={},
+                        status=AgentExecutionLog.STATUS_FAILED,
+                        error=str(e)
+                    )
+                raise e
 
         return node_func

@@ -2,8 +2,15 @@
 
 from .application import Application
 from .candidate import Candidate
-from .choices import ApplicationSource, CandidateStatus, JobStatus
+from .choices import (
+    ApplicationSource,
+    CandidateStatus,
+    JobStatus,
+    SocialPlatform,
+    SocialPostStatus,
+)
 from .job_vacancy import JobVacancy
+from .social_post import VacancySocialPost
 
 __all__ = [
     "Application",
@@ -12,4 +19,7 @@ __all__ = [
     "CandidateStatus",
     "JobStatus",
     "JobVacancy",
+    "SocialPlatform",
+    "SocialPostStatus",
+    "VacancySocialPost",
 ]
