@@ -19,7 +19,15 @@ def get_llm_for_tenant(tenant_config: TenantAIConfig):
 
     if tenant_config and tenant_config.api_key:
         # BYOK: El cliente trae su propia llave
-        api_key = tenant_config.api_key
+        try:
+            # Usar método de desencriptación
+            if hasattr(tenant_config, 'get_decrypted_api_key'):
+                api_key = tenant_config.get_decrypted_api_key()
+            else:
+                api_key = tenant_config.api_key
+        except Exception as e:
+            raise ValueError(f"Error al desencriptar API Key del Tenant: {str(e)}")
+
         provider = tenant_config.provider
         model_name = tenant_config.model_name
     else:
@@ -28,6 +36,10 @@ def get_llm_for_tenant(tenant_config: TenantAIConfig):
         provider = AIProvider.OPENAI  # Default de plataforma
         api_key = settings.OPENAI_API_KEY_GLOBAL
         model_name = "gemini-1.5-flash"  # Default de plataforma
+
+    # Validación Estricta
+    if not api_key:
+        raise ValueError("Error Crítico: No se detectó ninguna API Key válida (BYOK o Plataforma). Verifique configuración de fondos/cuota.")
     
     if not api_key:
         raise ValueError("No se encontró una API Key válida (ni del tenant ni global).")

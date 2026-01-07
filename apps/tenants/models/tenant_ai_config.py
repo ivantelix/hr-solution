@@ -109,31 +109,56 @@ class TenantAIConfig(models.Model):
     def get_safe_api_key(self) -> str:
         """
         Obtiene una versión parcialmente oculta de la API Key.
-
-        Returns:
-            str: API Key con caracteres ocultos (ej: sk-***xyz).
-
-        Note:
-            Útil para mostrar en UI sin exponer la key completa.
         """
-        if len(self.api_key) <= 10:
-            return "***"
-        return f"{self.api_key[:3]}***{self.api_key[-3:]}"
+        return "sk-*** (Hidden)"
 
     def update_api_key(self, new_api_key: str) -> None:
         """
-        Actualiza la API Key de forma segura.
-
-        Args:
-            new_api_key: Nueva API Key a configurar.
-
-        Note:
-            Aquí se debe implementar la encriptación de la key
-            antes de guardarla.
+        Actualiza la API Key de forma segura (encriptada).
         """
-        # TODO: Implementar encriptación
-        self.api_key = new_api_key
-        self.save(update_fields=["api_key", "updated_at"])
+        try:
+            from cryptography.fernet import Fernet
+            import os
+            import base64
+            
+            encryption_key = os.environ.get("FERNET_KEY")
+            if not encryption_key:
+                encryption_key = base64.urlsafe_b64encode(b"0" * 32)
+            
+            f = Fernet(encryption_key)
+            encrypted = f.encrypt(new_api_key.encode())
+            
+            self.api_key = encrypted.decode()
+            self.save(update_fields=["api_key", "updated_at"])
+            
+        except ImportError:
+            self.api_key = new_api_key
+            self.save(update_fields=["api_key", "updated_at"])
+
+    def get_decrypted_api_key(self) -> str:
+        """
+        Devuelve la API Key desencriptada.
+        """
+        try:
+            from cryptography.fernet import Fernet
+            import os
+            import base64
+            
+            encryption_key = os.environ.get("FERNET_KEY")
+            if not encryption_key:
+                encryption_key = base64.urlsafe_b64encode(b"0" * 32) 
+            
+            f = Fernet(encryption_key)
+            try:
+                if not self.api_key:
+                    return ""
+                decrypted = f.decrypt(self.api_key.encode())
+                return decrypted.decode()
+            except Exception:
+                return self.api_key
+                
+        except ImportError:
+            return self.api_key
 
     def deactivate(self) -> None:
         """

@@ -19,13 +19,26 @@ class UsageService:
     de las ejecuciones de agentes.
     """
 
+    # @TODO: Pronto Antes de sacar el MVP esto debe configurarse en db en una 
+    # tabla de settings administrado por un superadmin o algun otro usuario
+
     # Precios y Límites (Idealmente mover a DB/Settings)
     PRICING = {
-        "gpt-4": {"input": Decimal("0.03"), "output": Decimal("0.06")},  # $30/1M, $60/1M (Legacy 8k)
-        "gpt-4o": {"input": Decimal("0.005"), "output": Decimal("0.015")}, # $5/1M, $15/1M
-        "gpt-3.5-turbo": {"input": Decimal("0.0005"), "output": Decimal("0.0015")},
-        "claude-3-opus": {"input": Decimal("0.015"), "output": Decimal("0.075")},
-        "default": {"input": Decimal("0.005"), "output": Decimal("0.015")}, # Default to GPT-4o
+        "gpt-4": {
+            "input": Decimal("0.03"), "output": Decimal("0.06")
+        },  # $30/1M, $60/1M (Legacy 8k)
+        "gpt-4o": {
+            "input": Decimal("0.005"), "output": Decimal("0.015")
+        },  # $5/1M, $15/1M
+        "gpt-3.5-turbo": {
+            "input": Decimal("0.0005"), "output": Decimal("0.0015")
+        },
+        "claude-3-opus": {
+            "input": Decimal("0.015"), "output": Decimal("0.075")
+        },
+        "default": {
+            "input": Decimal("0.005"), "output": Decimal("0.015")
+        },  # Default to GPT-4o
     }
     
     # Límite "hardcodeado" para MVP: $50 USD al mes por tenant
@@ -113,19 +126,28 @@ class UsageService:
             logger.error(f"Tenant {tenant_id} no encontrado para logging")
             return None
 
-        # Extraer tokens
-        usage = metadata.get("token_usage", {}) or {}
-        # Soporte para diferentes estructuras de metadata según el proveedor
-        # OpenAI/LangChain estándar suele ser 'token_usage': {'prompt_tokens': X, 'completion_tokens': Y}
+        # Estrategia de extracción de tokens robusta para múltiples proveedores
+        # 1. Intentar key estándar de LangChain reciente 'usage_metadata'
+        usage = metadata.get("usage_metadata") or {}
         
-        prompt_tokens = usage.get("prompt_tokens", 0)
-        completion_tokens = usage.get("completion_tokens", 0)
+        # 2. Si encadenado, a veces está en 'token_usage'
+        if not usage:
+            usage = metadata.get("token_usage") or {}
+            
+        prompt_tokens = usage.get("input_tokens") or usage.get("prompt_tokens") or 0
+        completion_tokens = usage.get("output_tokens") or usage.get("completion_tokens") or 0
         
-        # Si no está en 'token_usage', buscar en claves directas (algunos adaptadores)
-        if not prompt_tokens and "prompt_tokens" in metadata:
-            prompt_tokens = metadata["prompt_tokens"]
-        if not completion_tokens and "completion_tokens" in metadata:
-            completion_tokens = metadata["completion_tokens"]
+        if not prompt_tokens:
+            prompt_tokens = (
+                metadata.get("input_tokens") or
+                metadata.get("prompt_tokens") or 0
+            )
+
+        if not completion_tokens:
+            completion_tokens = (
+                metadata.get("output_tokens") or
+                metadata.get("completion_tokens") or 0
+            )
 
         # Determinar modelo usado
         model_name = metadata.get("model_name", "gpt-4o")
