@@ -50,7 +50,7 @@ ai_config, _ = TenantAIConfig.objects.get_or_create(
     defaults={
         "provider": "openai", # o "gemini", "claude"
         "model_name": "gpt-4o",
-        "api_key": "AIzaSyBu_34l2L33qDU2nX-UQjvABAsazbVtrIA" # Opcional si usas settings globales
+        "api_key": "tu api key" # Opcional si usas settings globales
     }
 )
 print(f"Tenant ID: {tenant.id}")
