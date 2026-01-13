@@ -33,9 +33,9 @@ def get_llm_for_tenant(tenant_config: TenantAIConfig):
     else:
         # Plataforma: Usar llaves maestras
         # TODO: Aquí podríamos validar cuotas antes de asignar
-        provider = AIProvider.OPENAI  # Default de plataforma
-        api_key = settings.OPENAI_API_KEY_GLOBAL
-        model_name = "gemini-1.5-flash"  # Default de plataforma
+        provider = AIProvider.GEMINI  # Default de plataforma
+        api_key = settings.GEMINI_API_KEY_GLOBAL
+        model_name = "gemini-2.5"  # Default de plataforma
 
     # Validación Estricta
     if not api_key:

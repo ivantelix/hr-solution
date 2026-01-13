@@ -41,20 +41,22 @@ class JobVacancyService:
         title: str,
         description: str,
         user_id: int,
+        social_platforms: list[str] | None = None,
         **extra_fields: Any,
-    ) -> JobVacancy:
+    ) -> tuple[JobVacancy, list[VacancySocialPost]]:
         """
-        Crea una nueva vacante.
+        Crea una nueva vacante y opcionalmente genera posts sociales.
 
         Args:
             tenant_id: ID del tenant.
             title: Título del puesto.
             description: Descripción.
             user_id: ID del usuario creador.
+            social_platforms: Lista de plataformas para generar posts (opcional).
             **extra_fields: Campos adicionales.
 
         Returns:
-            JobVacancy: Vacante creada.
+            tuple: (JobVacancy creada, lista de posts generados).
 
         Raises:
             ValueError: Si el tenant no existe.
@@ -63,7 +65,7 @@ class JobVacancyService:
         if not tenant:
             raise ValueError("El tenant no existe.")
 
-        return self.repository.create(
+        vacancy = self.repository.create(
             tenant=tenant,
             title=title,
             description=description,
@@ -71,20 +73,29 @@ class JobVacancyService:
             **extra_fields,
         )
 
+        # Generar posts sociales si se especificaron plataformas
+        social_posts = []
+        if social_platforms:
+            social_posts = self.generate_social_previews(vacancy.id, social_platforms)
+
+        return vacancy, social_posts
+
     @transaction.atomic
     def generate_social_previews(
         self, vacancy_id: int, platforms: list[str]
     ) -> list[VacancySocialPost]:
         """
-        Genera previsualizaciones de posts para redes sociales.
+        Genera previsualizaciones de posts para redes sociales usando IA.
 
         Args:
             vacancy_id: ID de la vacante.
-            platforms: Lista de plataformas (linkedin, twitter, etc).
+            platforms: Lista de plataformas (linkedin, twitter, facebook).
 
         Returns:
             list[VacancySocialPost]: Lista de posts generados.
         """
+        from apps.recruitment.services import SocialMediaContentGenerator
+
         vacancy = self.repository.get_by_id(vacancy_id)
         if not vacancy:
             raise ValueError("La vacante no existe.")
@@ -96,44 +107,11 @@ class JobVacancyService:
             status=SocialPostStatus.DRAFT,
         ).delete()
 
-        created_posts = []
-        for platform in platforms:
-            content = self._generate_content_template(vacancy, platform)
-            post = VacancySocialPost.objects.create(
-                vacancy=vacancy,
-                platform=platform,
-                content=content,
-                status=SocialPostStatus.DRAFT,
-            )
-            created_posts.append(post)
+        # Usar el generador de IA
+        generator = SocialMediaContentGenerator()
+        created_posts = generator.generate_posts_for_vacancy(vacancy, platforms)
 
         return created_posts
-
-    def _generate_content_template(self, vacancy: JobVacancy, platform: str) -> str:
-        """Genera contenido base según la plataforma."""
-        if platform == SocialPlatform.LINKEDIN:
-            return (
-                f"🚀 ¡Estamos contratando!\n\n"
-                f"En {vacancy.tenant.name} buscamos un {vacancy.title} "
-                f"para unirse a nuestro equipo.\n\n"
-                f"{vacancy.description[:200]}...\n\n"
-                f"📍 {vacancy.location}\n"
-                f"apply here!"
-            )
-        elif platform == SocialPlatform.TWITTER:
-            return (
-                f"Estamos buscando un {vacancy.title}! 🌟\n"
-                f"Ubicación: {vacancy.location}\n"
-                f"Apply now! #hiring #job #tech"
-            )
-        elif platform == SocialPlatform.FACEBOOK:
-            return (
-                f"📢 Oportunidad Laboral en {vacancy.tenant.name}\n\n"
-                f"Buscamos: {vacancy.title}\n\n"
-                f"{vacancy.description[:150]}...\n\n"
-                f"¡Postúlate ahora!"
-            )
-        return f"New Job: {vacancy.title}"
 
     @transaction.atomic
     def publish_vacancy(self, vacancy_id: int) -> JobVacancy | None:

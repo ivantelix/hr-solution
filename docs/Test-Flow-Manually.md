@@ -33,10 +33,14 @@ Debemos crear la "empresa" que usará el sistema.
 from apps.tenants.models import Tenant, TenantAIConfig
 
 # 1. Crear Tenant
+# 1. Crear Tenant
 tenant, _ = Tenant.objects.get_or_create(
     name="Empresa Prueba",
-    domain="prueba.com",
-    schema_name="public" # Si usas multi-tenancy real via schemas, ajusta esto.
+    slug="prueba-com", # Usamos slug como identificador
+    defaults={
+        "is_active": True,
+        "max_users": 10
+    }
 )
 
 # 2. Configurar IA para el Tenant
@@ -46,7 +50,7 @@ ai_config, _ = TenantAIConfig.objects.get_or_create(
     defaults={
         "provider": "openai", # o "gemini", "claude"
         "model_name": "gpt-4o",
-        "api_key": "sk-TU-API-KEY-REAL" # Opcional si usas settings globales
+        "api_key": "AIzaSyBu_34l2L33qDU2nX-UQjvABAsazbVtrIA" # Opcional si usas settings globales
     }
 )
 print(f"Tenant ID: {tenant.id}")
@@ -92,7 +96,7 @@ candidate = Candidate.objects.create(
     first_name="Juan",
     last_name="Perez",
     email="juan.perez@test.com",
-    linkedin_profile="https://linkedin.com/in/juanperez-test" # URL simulada
+    linkedin_url="https://linkedin.com/in/juanperez-test" # URL simulada
 )
 
 # Creamos la postulación (Application)

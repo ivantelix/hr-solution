@@ -40,14 +40,29 @@ class JobVacancyViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        # Extraer social_platforms si está presente
+        social_platforms = request.data.get("social_platforms", [])
+
         try:
-            vacancy = self.service.create_vacancy(
+            vacancy, social_posts = self.service.create_vacancy(
                 tenant_id=request.tenant_id,
                 user_id=request.user.id,
+                social_platforms=social_platforms if social_platforms else None,
                 **serializer.validated_data,
             )
+
+            # Preparar respuesta con vacante y posts generados
+            response_data = JobVacancySerializer(vacancy).data
+
+            if social_posts:
+                from apps.recruitment.serializers import VacancySocialPostSerializer
+
+                response_data["social_posts"] = VacancySocialPostSerializer(
+                    social_posts, many=True
+                ).data
+
             return Response(
-                JobVacancySerializer(vacancy).data,
+                response_data,
                 status=status.HTTP_201_CREATED,
             )
         except ValueError as e:
